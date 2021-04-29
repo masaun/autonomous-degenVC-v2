@@ -51,7 +51,7 @@ contract LiquidVault is Ownable {
         uint8 donationShare; //0-100
         uint8 purchaseFee; //0-100
     }
-    
+      
     bool public forceUnlock;
     bool private locked;
 
@@ -134,23 +134,23 @@ contract LiquidVault is Ownable {
         uint infinityRequired;
 
         if (address(config.infinityToken) < address(config.weth)) {
-            infinityRequired = config.uniswapRouter.quote(
-                exchangeValue,
-                reserve2,
-                reserve1
-            );
+              infinityRequired = config.uniswapRouter.quote(
+                  exchangeValue,
+                  reserve2,
+                  reserve1
+              );
         } else {
-            infinityRequired = config.uniswapRouter.quote(
-                exchangeValue,
-                reserve1,
-                reserve2
-            );
+              infinityRequired = config.uniswapRouter.quote(
+                  exchangeValue,
+                  reserve1,
+                  reserve2
+              );
         }
 
         uint balance = IERC20(config.infinityToken).balanceOf(address(this));
         require(
-            balance >= infinityRequired,
-            "LiquidVault: insufficient INFINITY tokens in LiquidVault"
+              balance >= infinityRequired,
+              "LiquidVault: insufficient INFINITY tokens in LiquidVault"
         );
 
         IWETH(config.weth).deposit{ value: exchangeValue }();
@@ -181,7 +181,7 @@ contract LiquidVault is Ownable {
             block.timestamp
         );
 
-        emit EthTransferred(msg.sender, exchangeValue, feeValue);
+         emit EthTransferred(msg.sender, exchangeValue, feeValue);
     }
 
     //send ETH to match with INFINITY tokens in LiquidVault
