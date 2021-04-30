@@ -7,6 +7,11 @@ contract ProjectTokenFactory {
 
     constructor() public {}
 
-    function createProjectToken() public returns (bool) {}
+    /**
+     * @notice - Create a Project Token for a project
+     */
+    function createProjectToken() public returns (bool) {
+
+    }
 
 }
