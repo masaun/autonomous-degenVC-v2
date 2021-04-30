@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.4;
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "./IInfinityProtocol.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
+//import { IInfinityProtocol } from "./IInfinityProtocol.sol";
+import { IProjectToken } from "../IProjectToken.sol";
+
 
 contract FeeDistributor is Ownable {
     using SafeMath for uint;
@@ -14,7 +16,7 @@ contract FeeDistributor is Ownable {
         uint256 burnPercentage;
     }
     
-    IInfinityProtocol public infinity;
+    IProjectToken public projectToken;
     FeeRecipient public recipients;
 
     bool public initialized;
@@ -30,7 +32,7 @@ contract FeeDistributor is Ownable {
     }
 
     function seed(
-        address _infinity,
+        address _projectToken,
         address _vault,
         address _secondaryAddress,
         uint _liquidVaultShare,
@@ -40,7 +42,7 @@ contract FeeDistributor is Ownable {
             _liquidVaultShare.add(_burnPercentage) <= 100,
             "FeeDistributor: liquidVault + burnPercentage incorrect sets"
         );
-        infinity = IInfinityProtocol(_infinity);
+        projectToken = IProjectToken(_projectToken);
         recipients.liquidVault = _vault;
         recipients.secondaryAddress = _secondaryAddress;
         recipients.liquidVaultShare = _liquidVaultShare;
@@ -49,7 +51,7 @@ contract FeeDistributor is Ownable {
     }
 
     function distributeFees() external seeded {
-        uint balance = infinity.balanceOf(address(this));
+        uint balance = projectToken.balanceOf(address(this));
 
         if (balance < MINIMUM_AMOUNT) {
             return;
@@ -63,20 +65,20 @@ contract FeeDistributor is Ownable {
             liquidShare = recipients.liquidVaultShare.mul(balance).div(100);
 
             require(
-                infinity.transfer(recipients.liquidVault, liquidShare),
+                projectToken.transfer(recipients.liquidVault, liquidShare),
                 "FeeDistributor: transfer to LiquidVault failed"
             );
         }
 
         if (recipients.burnPercentage > 0) {
             burningShare = recipients.burnPercentage.mul(balance).div(100);
-            infinity.burn(burningShare);
+            projectToken.burn(burningShare);
         }
 
         secondaryShare = balance.sub(liquidShare).sub(burningShare);
         if (secondaryShare > 0) {
             require(
-            infinity.transfer(recipients.secondaryAddress, secondaryShare),
+            projectToken.transfer(recipients.secondaryAddress, secondaryShare),
             "FeeDistributor: transfer to the secondary address failed"
         );
         }

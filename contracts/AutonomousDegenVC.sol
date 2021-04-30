@@ -14,6 +14,11 @@ contract AutonomousDegenVC {
     constructor() public {}
 
     /**
+     * @notice - Create a Liquid Vault for a project
+     */
+    function createLiquidVaultForProject() public returns (bool) {}
+
+    /**
      * @notice - ① A Uniswap market is created for the new project
      */
     function createUniswapMarketForProject() public returns (bool) {}
