@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.4;
 
+import { IProjectToken } from "./IProjectToken.sol";
+import { LiquidVault } from "./degen-vc/LiquidVault.sol";
+
+
 /**
  * @notice - This is a smart contract that is automate process of Degen.VC
  *
@@ -14,11 +18,6 @@ contract AutonomousDegenVC {
     constructor() public {}
 
     /**
-     * @notice - Create a Liquid Vault for a project
-     */
-    function createLiquidVaultForProject() public returns (bool) {}
-
-    /**
      * @notice - ① A Uniswap market is created for the new project
      */
     function createUniswapMarketForProject() public returns (bool) {}
@@ -26,7 +25,7 @@ contract AutonomousDegenVC {
     /**
      * @notice - Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP;
      */    
-    function alphadropPartOfTokens() public returns (bool) {}
+    function alphadropPartOfProjectTokens() public returns (bool) {}
 
     /**
      * @notice - ③ A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
