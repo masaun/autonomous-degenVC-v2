@@ -1,7 +1,7 @@
-# Autonomous Degen VC V2
+# Autonomous Degen.VC V2
 
 ***
-## 【Introduction of the Autonomous Degen VC V2】
+## 【Introduction of the Autonomous Degen.VC V2】
 - This is a smart contract that: 
 
 
@@ -17,11 +17,11 @@
 ***
 
 ## 【Remarks】
-- Version for following the `1inch` smart contract
-  - Solidity (Solc): v0.6.12
+- Version for following the `Degen.VC` smart contract
+  - Solidity (Solc): v0.7.4
   - Truffle: v5.1.60
   - web3.js: v1.2.9
-  - openzeppelin-solidity: v3.2.0
+  - @openzeppelin/contracts: v3.4.1
   - ganache-cli: v6.9.1 (ganache-core: 2.10.2)
 
 
