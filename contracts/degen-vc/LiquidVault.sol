@@ -21,7 +21,7 @@ contract LiquidVault is Ownable {
         address holder,
         uint amount,
         uint eth,
-        uint infinityToken,
+        uint projectToken,
         uint timestamp
     );
 
@@ -42,7 +42,7 @@ contract LiquidVault is Ownable {
     }
 
     struct LiquidVaultConfig {
-        address infinityToken;
+        address projectToken;
         IUniswapV2Router02 uniswapRouter;
         IUniswapV2Pair tokenPair;
         IFeeDistributor feeDistributor;
@@ -70,7 +70,7 @@ contract LiquidVault is Ownable {
 
     function seed(
         uint32 duration,
-        address infinityToken,
+        address projectToken,
         address uniswapPair,
         address uniswapRouter,
         address feeDistributor,
@@ -78,7 +78,7 @@ contract LiquidVault is Ownable {
         uint8 donationShare, // LP Token
         uint8 purchaseFee // ETH
     ) public onlyOwner {
-        config.infinityToken = infinityToken;
+        config.projectToken = projectToken;
         config.uniswapRouter = IUniswapV2Router02(uniswapRouter);
         config.tokenPair = IUniswapV2Pair(uniswapPair);
         config.feeDistributor = IFeeDistributor(feeDistributor);
@@ -134,7 +134,7 @@ contract LiquidVault is Ownable {
 
         uint infinityRequired;
 
-        if (address(config.infinityToken) < address(config.weth)) {
+        if (address(config.projectToken) < address(config.weth)) {
               infinityRequired = config.uniswapRouter.quote(
                   exchangeValue,
                   reserve2,
@@ -148,7 +148,7 @@ contract LiquidVault is Ownable {
               );
         }
 
-        uint balance = IERC20(config.infinityToken).balanceOf(address(this));
+        uint balance = IERC20(config.projectToken).balanceOf(address(this));
         require(
               balance >= infinityRequired,
               "LiquidVault: insufficient INFINITY tokens in LiquidVault"
@@ -157,7 +157,7 @@ contract LiquidVault is Ownable {
         IWETH(config.weth).deposit{ value: exchangeValue }();
         address tokenPairAddress = address(config.tokenPair);
         IWETH(config.weth).transfer(tokenPairAddress, exchangeValue);
-        IERC20(config.infinityToken).transfer(
+        IERC20(config.projectToken).transfer(
             tokenPairAddress,
             infinityRequired
         );

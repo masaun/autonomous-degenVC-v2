@@ -13,4 +13,8 @@ contract ProjectToken is ERC20 {
         _mint(msg.sender, initialSupply);
     }
 
+    function burn(uint amount) public returns (bool) {
+        _burn(msg.sender, amount);
+    }
+
 }
