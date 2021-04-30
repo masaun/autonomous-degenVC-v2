@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.4;
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "./IERC20.sol";
-import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
-import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
-import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
-import "./IFeeDistributor.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IUniswapV2Router02 } from "../uniswap-v2/uniswap-v2-periphery/interfaces/IUniswapV2Router02.sol";
+import { IWETH } from "../uniswap-v2/uniswap-v2-periphery/interfaces/IWETH.sol";
+import { IUniswapV2Pair } from "../uniswap-v2/uniswap-v2-core/interfaces/IUniswapV2Pair.sol";
+import { IFeeDistributor } from "./IFeeDistributor.sol";
 
 contract LiquidVault is Ownable {
     /** Emitted when purchaseLP() is called to track ETH amounts */
