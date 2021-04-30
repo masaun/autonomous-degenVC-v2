@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.4;
+
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IUniswapV2Router02 } from "../uniswap-v2/uniswap-v2-periphery/interfaces/IUniswapV2Router02.sol";
@@ -185,7 +186,7 @@ contract LiquidVault is Ownable {
          emit EthTransferred(msg.sender, exchangeValue, feeValue);
     }
 
-    //send ETH to match with INFINITY tokens in LiquidVault
+    //send ETH to match with the ProjectTokens in LiquidVault
     function purchaseLP() public payable {
         purchaseLPFor(msg.sender);
     }
