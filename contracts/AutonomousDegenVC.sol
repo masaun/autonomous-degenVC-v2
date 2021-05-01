@@ -49,7 +49,6 @@ contract AutonomousDegenVC {
      * @notice - Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP;
      */    
     function alphadropPartOfProjectTokens(IProjectToken projectToken, uint totalAlphadroppedAmount) public returns (bool) {
-        /// [Todo]: Identify share of the LPs
         address[] memory lpHolders = getLpHolders();
 
         /// [Todo]: Alphadrop the ProjectTokens into each LP holders
@@ -57,7 +56,9 @@ contract AutonomousDegenVC {
             address lpHolder = lpHolders[i];
             uint lpBalance = lp.balanceOf(lpHolder);
             uint lpTotalSupply = lp.totalSupply();
-            uint shareOfLp = lpBalance.div(lpTotalSupply);
+
+            /// Identify share of the LPs
+            uint shareOfLp = lpBalance.div(lpTotalSupply).mul(100);
 
             uint alphadroppedAmount = totalAlphadroppedAmount.mul(shareOfLp).div(100);
 
