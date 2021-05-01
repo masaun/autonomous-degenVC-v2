@@ -51,13 +51,13 @@ contract AutonomousDegenVC {
     function alphadropPartOfProjectTokens(IProjectToken projectToken, uint totalAlphadroppedAmount) public returns (bool) {
         address[] memory lpHolders = getLpHolders();
 
-        /// [Todo]: Alphadrop the ProjectTokens into each LP holders
+        // [Todo]: Alphadrop the ProjectTokens into each LP holders
         for (uint i=0; i < lpHolders.length; i++) {
             address lpHolder = lpHolders[i];
             uint lpBalance = lp.balanceOf(lpHolder);
             uint lpTotalSupply = lp.totalSupply();
 
-            /// Identify share of the LPs
+            // Identify share of the LPs
             uint shareOfLp = lpBalance.div(lpTotalSupply).mul(100);
 
             uint alphadroppedAmount = totalAlphadroppedAmount.mul(shareOfLp).div(100);
@@ -69,7 +69,12 @@ contract AutonomousDegenVC {
     /**
      * @notice - ③ A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
      */
-    function capitalizeWithProjectTokens() public returns (bool) {}
+    function capitalizeWithProjectTokens(LiquidVault liquidVault, IProjectToken projectToken, uint capitalizedAmount) public returns (bool) {
+        address LIQUID_VAULT = address(liquidVault);
+
+        projectToken.transferFrom(msg.sender, address(this), capitalizedAmount);
+        projectToken.transfer(LIQUID_VAULT, capitalizedAmount);
+    }
 
 
     ///----------------
