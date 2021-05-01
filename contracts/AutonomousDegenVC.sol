@@ -26,9 +26,13 @@ contract AutonomousDegenVC {
     IUniswapV2Pair public lp;    /// UNI LP token (DGVC-ETH)
     IUniswapV2Router02 public uniswapV2Router02;
 
+    address UNI_LP_TOKEN;        /// Contract address of UNI LP token (DGVC-ETH)
+
     constructor(IUniswapV2Pair _lp, IUniswapV2Router02 _uniswapV2Router02) public {
         lp = _lp;
         uniswapV2Router02 = _uniswapV2Router02;
+
+        UNI_LP_TOKEN = address(lp);
     }
 
     /**
@@ -41,7 +45,8 @@ contract AutonomousDegenVC {
         uint amountETHMin,
         address to,
         uint deadline
-    ) public returns (bool) {
+    ) public payable returns (bool) {
+        require(msg.value >= amountETHMin, "msg.value should be more than amountETHMin");
         uniswapV2Router02.addLiquidityETH(token, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline);
     }
 
