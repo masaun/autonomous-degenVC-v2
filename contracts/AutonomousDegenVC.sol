@@ -39,7 +39,7 @@ contract AutonomousDegenVC {
      * @notice - ① A Uniswap market is created for the new project
      */
     function createUniswapMarketForProject(
-        address token,
+        IProjectToken projectToken,
         uint amountTokenDesired,
         uint amountTokenMin,
         uint amountETHMin,
@@ -47,7 +47,7 @@ contract AutonomousDegenVC {
         uint deadline
     ) public payable returns (bool) {
         require(msg.value >= amountETHMin, "msg.value should be more than amountETHMin");
-        uniswapV2Router02.addLiquidityETH(token, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline);
+        uniswapV2Router02.addLiquidityETH(address(projectToken), amountTokenDesired, amountTokenMin, amountETHMin, to, deadline);
     }
 
     /**
