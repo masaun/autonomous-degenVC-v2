@@ -34,4 +34,12 @@ contract("AutonomousDegenVC", function(accounts) {
         })
     })
 
+    describe("Process", () => {
+        it("Deploy the AutonomousDegenVC contract instance", async () => {
+            autonomousDegenVC = await AutonomousDegenVC.new(UNISWAP_V2_PAIR, UNISWAP_V2_ROUTER_02, { from: deployer })
+            AUTONOMOUS_DEGEN_VC = autonomousDegenVC.address
+        })
+    })
+
+
 })
