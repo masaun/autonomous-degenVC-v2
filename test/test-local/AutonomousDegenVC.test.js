@@ -2,6 +2,13 @@
 const Web3 = require('web3');
 const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8545'))
 
+/// Openzeppelin test-helper
+const { time } = require('@openzeppelin/test-helpers');
+
+/// Import deployed-addresses
+const contractAddressList = require("../../migrations/addressesList/contractAddress/contractAddress.js")
+const tokenAddressList = require("../../migrations/addressesList/tokenAddress/tokenAddress.js")
+
 /// Artifact of smart contracts 
 const AutonomousDegenVC = artifacts.require("AutonomousDegenVC")
 const LiquidVaultFactory = artifacts.require("LiquidVaultFactory")
@@ -36,6 +43,21 @@ contract("AutonomousDegenVC", function(accounts) {
     let PROJECT_TOKEN_FACTORY
     let PROJECT_TOKEN
 
+    async function getEvents(contractInstance, eventName) {
+        const _latestBlock = await time.latestBlock()
+        const LATEST_BLOCK = Number(String(_latestBlock))
+
+        /// [Note]: Retrieve an event log of eventName (via web3.js v1.0.0)
+        let events = await contractInstance.getPastEvents(eventName, {
+            filter: {},
+            fromBlock: LATEST_BLOCK,  /// [Note]: The latest block on Mainnet
+            //fromBlock: 0,
+            toBlock: 'latest'
+        })
+        console.log(`\n=== [Event log]: ${ eventName } ===`, events[0].returnValues)
+        return events[0].returnValues
+    } 
+
     describe("Setup smart-contracts", () => {
         it("Deploy the LiquidVaultFactory contract instance", async () => {
             liquidVaultFactory = await LiquidVaultFactory.new({ from: deployer })
@@ -58,9 +80,11 @@ contract("AutonomousDegenVC", function(accounts) {
             const name = "Test Project Token"
             const symbol = "TPT"
             const initialSupply = web3.utils.toWei("100000000", "ether") 
-
             let txReceipt = await projectTokenFactory.createProjectToken(name, symbol, initialSupply, { from: deployer })
-            //PROJECT_TOKEN = projectToken.address
+
+            let event = await getEvents(projectTokenFactory, "ProjectTokenCreated")
+            PROJECT_TOKEN = event.projectToken
+            console.log('=== PROJECT_TOKEN ===', PROJECT_TOKEN)
         })
 
         it("createUniswapMarketForProject", async () => {

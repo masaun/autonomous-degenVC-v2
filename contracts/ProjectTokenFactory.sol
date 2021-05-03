@@ -7,6 +7,8 @@ contract ProjectTokenFactory {
 
     address[] public projectTokens;
 
+    event ProjectTokenCreated(string name, string symbol, uint initialSupply, ProjectToken projectToken);
+
     constructor() public {}
 
     /**
@@ -19,6 +21,8 @@ contract ProjectTokenFactory {
     ) public returns (bool) {
         ProjectToken projectToken = new ProjectToken(name, symbol, initialSupply);
         projectTokens.push(address(projectToken));
+
+        emit ProjectTokenCreated(name, symbol, initialSupply, projectToken);
     }
 
 }
