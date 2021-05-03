@@ -16,7 +16,7 @@ const ProjectTokenFactory = artifacts.require("ProjectTokenFactory")
 const ProjectToken = artifacts.require("ProjectToken")
 
 /// Deployed-addresses
-const UNISWAP_V2_PAIR = "0x7CDc560CC66126a5Eb721e444abC30EB85408f7A"
+const UNISWAP_V2_PAIR = "0x7CDc560CC66126a5Eb721e444abC30EB85408f7A"  /// UNI-LP Token (DGVC - ETH pair)
 const UNISWAP_V2_ROUTER_02 = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"
 
 
@@ -35,12 +35,14 @@ contract("AutonomousDegenVC", function(accounts) {
     let autonomousDegenVC
     let liquidVaultFactory
     let projectTokenFactory
+    let liquidVault
     let projectToken
 
     /// Global variable for each contract addresses
     let AUTONOMOUS_DEGEN_VC
     let LIQUID_VAULT_FACTORY
     let PROJECT_TOKEN_FACTORY
+    let LIQUID_VAULT
     let PROJECT_TOKEN
 
     async function getEvents(contractInstance, eventName) {
@@ -54,7 +56,7 @@ contract("AutonomousDegenVC", function(accounts) {
             //fromBlock: 0,
             toBlock: 'latest'
         })
-        console.log(`\n=== [Event log]: ${ eventName } ===`, events[0].returnValues)
+        //console.log(`\n=== [Event log]: ${ eventName } ===`, events[0].returnValues)
         return events[0].returnValues
     } 
 
@@ -75,7 +77,7 @@ contract("AutonomousDegenVC", function(accounts) {
         })
     })
 
-    describe("Process", () => {
+    describe("Workflow of the AutonomousDegenVC contract", () => {
         it("createProjectToken", async () => {
             const name = "Test Project Token"
             const symbol = "TPT"
@@ -85,6 +87,20 @@ contract("AutonomousDegenVC", function(accounts) {
             let event = await getEvents(projectTokenFactory, "ProjectTokenCreated")
             PROJECT_TOKEN = event.projectToken
             console.log('=== PROJECT_TOKEN ===', PROJECT_TOKEN)
+        })
+
+        it("createLiquidVault", async () => {
+            /// [Todo]: Replace assigned-value with exact value
+            const duration = 0
+            const feeDistributor = deployer
+            const feeReceiver = user1
+            const donationShare = 1   // LP Token
+            const purchaseFee = 1 　　 // ETH
+            let txReceipt = await liquidVaultFactory.createLiquidVault(duration, PROJECT_TOKEN, UNISWAP_V2_PAIR, UNISWAP_V2_ROUTER_02, feeDistributor, feeReceiver, donationShare, purchaseFee, { from: deployer })
+
+            let event = await getEvents(liquidVaultFactory, "LiquidVaultCreated")
+            LIQUID_VAULT = event.liquidVault
+            console.log('=== LIQUID_VAULT ===', LIQUID_VAULT)
         })
 
         it("createUniswapMarketForProject", async () => {
@@ -98,6 +114,5 @@ contract("AutonomousDegenVC", function(accounts) {
             autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, amountTokenDesired, amountTokenMin, to, deadline, { from: deployer })
         })
     })
-
 
 })
