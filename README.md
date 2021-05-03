@@ -56,8 +56,8 @@ $ ganache-cli -d
 
 - 2: Execute test of the smart-contracts (on the local)
   - Test for the contract
-    `$ npm run test:something`
-    ($ truffle test ./test/test-local/Something.test.js)
+    `$ npm run test:AutonomousDegenVC`
+    ($ truffle test ./test/test-local/AutonomousDegenVC.test.js)
 
 <br>
 
