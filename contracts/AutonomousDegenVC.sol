@@ -21,7 +21,7 @@ import { IWETH } from "./uniswap-v2/uniswap-v2-periphery/interfaces/IWETH.sol";
 contract AutonomousDegenVC {
     using SafeMath for uint;
 
-    address[] public lpHolders;  /// UNI LP token (DGVC-ETH) holders address list
+    //address[] public lpHolders;  /// UNI LP token (DGVC-ETH) holders address list
 
     IUniswapV2Pair public lp;    /// UNI LP token (DGVC-ETH)
     IUniswapV2Router02 public uniswapV2Router02;
@@ -53,10 +53,15 @@ contract AutonomousDegenVC {
     /**
      * @notice - Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP;
      */    
-    function alphadropPartOfProjectTokens(IProjectToken projectToken, uint totalAlphadroppedAmount) public returns (bool) {
-        address[] memory lpHolders = getLpHolders();
+    function alphadropPartOfProjectTokens(
+        IProjectToken projectToken, 
+        uint totalAlphadroppedAmount, 
+        address[] memory lpHolders  // [Note]: Assign UNI-LP token holders (= DGVC-ETH pair) from front-end
+    ) public returns (bool) {
+        // [Todo]: Identify UNI-LP token holders (= DGVC-ETH pair)
+        //address[] memory lpHolders = getLpHolders();
 
-        // [Todo]: Alphadrop the ProjectTokens into each LP holders
+        // The ProjectTokens are alphadropped into each UNI-LP token holders
         for (uint i=0; i < lpHolders.length; i++) {
             address lpHolder = lpHolders[i];
             uint lpBalance = lp.balanceOf(lpHolder);
@@ -85,8 +90,11 @@ contract AutonomousDegenVC {
     ///----------------
     /// Getter methods
     ///----------------
-    function getLpHolders() public view returns (address[] memory _lpHolders) {
-        return lpHolders;
-    }
+    /**
+     * @notice - [Todo]: Identify UNI-LP token holders (= DGVC-ETH pair)
+     */
+    // function getLpHolders() public view returns (address[] memory _lpHolders) {
+    //     return lpHolders;
+    // }
     
 }
