@@ -4,6 +4,8 @@ const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8545'
 
 /// Artifact of smart contracts 
 const AutonomousDegenVC = artifacts.require("AutonomousDegenVC")
+const LiquidVaultFactory = artifacts.require("LiquidVaultFactory")
+const ProjectTokenFactory = artifacts.require("ProjectTokenFactory")
 const ProjectToken = artifacts.require("ProjectToken")
 
 /// Deployed-addresses
@@ -24,20 +26,25 @@ contract("AutonomousDegenVC", function(accounts) {
 
     /// Global contract instance
     let autonomousDegenVC
+    let liquidVaultFactory
+    let projectTokenFactory
     let projectToken
 
     /// Global variable for each contract addresses
     let AUTONOMOUS_DEGEN_VC
+    let LIQUID_VAULT_FACTORY
+    let PROJECT_TOKEN_FACTORY
     let PROJECT_TOKEN
 
     describe("Setup smart-contracts", () => {
-        it("Deploy the ProjectToken contract instance", async () => {
-            const name = "Test Project Token"
-            const symbol = "TPT"
-            const initialSupply = web3.utils.toWei("100000000", "ether") 
+        it("Deploy the LiquidVaultFactory contract instance", async () => {
+            liquidVaultFactory = await LiquidVaultFactory.new({ from: deployer })
+            LIQUID_VAULT_FACTORY = liquidVaultFactory.address
+        })
 
-            projectToken = await ProjectToken.new(name, symbol, initialSupply, { from: deployer })
-            PROJECT_TOKEN = projectToken.address
+        it("Deploy the ProjectTokenFactory contract instance", async () => {
+            projectTokenFactory = await ProjectTokenFactory.new({ from: deployer })
+            PROJECT_TOKEN_FACTORY = projectTokenFactory.address
         })
 
         it("Deploy the AutonomousDegenVC contract instance", async () => {
@@ -47,7 +54,17 @@ contract("AutonomousDegenVC", function(accounts) {
     })
 
     describe("Process", () => {
-        it("createUniswapMarketForProject()", async () => {
+        it("createProjectToken", async () => {
+            const name = "Test Project Token"
+            const symbol = "TPT"
+            const initialSupply = web3.utils.toWei("100000000", "ether") 
+
+            let txReceipt = await projectTokenFactory.createProjectToken(name, symbol, initialSupply, { from: deployer })
+            //PROJECT_TOKEN = projectToken.address
+        })
+
+        it("createUniswapMarketForProject", async () => {
+            /// [Todo]: Replace assigned-value with exact value
             const amountTokenDesired = 0
             const amountTokenMin = 0
             const amountETHMin = 0
