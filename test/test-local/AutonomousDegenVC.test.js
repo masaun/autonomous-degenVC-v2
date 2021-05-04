@@ -105,14 +105,17 @@ contract("AutonomousDegenVC", function(accounts) {
 
         it("createUniswapMarketForProject", async () => {
             /// [Todo]: Replace assigned-value with exact value
-            const amountTokenDesired = 0
-            const amountTokenMin = 0
-            const amountETHMin = 0
+            const amountTokenDesired = web3.utils.toWei('100', 'ether')
+            const amountTokenMin = web3.utils.toWei('10', 'ether')
+            const amountETHMin = web3.utils.toWei('0.01', 'ether')
             const to = user1
             const deadline = Date.now() / 1000
 
-            autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, amountTokenDesired, amountTokenMin, to, deadline, { from: deployer })
+            const ethAmount = web3.utils.toWei('0.1', 'ether')
+
+            let txReceipt = await autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline, { from: deployer, value: ethAmount })
         })
+
     })
 
 })
