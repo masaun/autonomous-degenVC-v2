@@ -116,6 +116,13 @@ contract("AutonomousDegenVC", function(accounts) {
             let txReceipt = await autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline, { from: deployer, value: ethAmount })
         })
 
+        it("alphadropPartOfProjectTokens", async () => {
+            /// [Todo]: Replace assigned-value with exact value
+            const totalAlphadroppedAmount = 0
+            const lpHolders = [user1, user2, user3]
+
+            let txReceipt = await autonomousDegenVC.alphadropPartOfProjectTokens(PROJECT_TOKEN, totalAlphadroppedAmount, lpHolders, { from: deployer })
+        })
     })
 
 })
