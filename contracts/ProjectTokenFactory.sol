@@ -7,7 +7,7 @@ contract ProjectTokenFactory {
 
     address[] public projectTokens;
 
-    event ProjectTokenCreated(string name, string symbol, uint initialSupply, ProjectToken projectToken);
+    event ProjectTokenCreated(string name, string symbol, uint initialSupply, ProjectToken _projectToken);
 
     constructor() public {}
 

@@ -13,6 +13,7 @@ const tokenAddressList = require("../../migrations/addressesList/tokenAddress/to
 const AutonomousDegenVC = artifacts.require("AutonomousDegenVC")
 const LiquidVaultFactory = artifacts.require("LiquidVaultFactory")
 const ProjectTokenFactory = artifacts.require("ProjectTokenFactory")
+const LiquidVault = artifacts.require("LiquidVault")
 const ProjectToken = artifacts.require("ProjectToken")
 
 /// Deployed-addresses
@@ -85,7 +86,8 @@ contract("AutonomousDegenVC", function(accounts) {
             let txReceipt = await projectTokenFactory.createProjectToken(name, symbol, initialSupply, { from: deployer })
 
             let event = await getEvents(projectTokenFactory, "ProjectTokenCreated")
-            PROJECT_TOKEN = event.projectToken
+            PROJECT_TOKEN = event._projectToken
+            projectToken = await ProjectToken.at(PROJECT_TOKEN)
             console.log('=== PROJECT_TOKEN ===', PROJECT_TOKEN)
         })
 
@@ -99,7 +101,7 @@ contract("AutonomousDegenVC", function(accounts) {
             let txReceipt = await liquidVaultFactory.createLiquidVault(duration, PROJECT_TOKEN, UNISWAP_V2_PAIR, UNISWAP_V2_ROUTER_02, feeDistributor, feeReceiver, donationShare, purchaseFee, { from: deployer })
 
             let event = await getEvents(liquidVaultFactory, "LiquidVaultCreated")
-            LIQUID_VAULT = event.liquidVault
+            LIQUID_VAULT = event._liquidVault
             console.log('=== LIQUID_VAULT ===', LIQUID_VAULT)
         })
 
@@ -122,6 +124,14 @@ contract("AutonomousDegenVC", function(accounts) {
             const lpHolders = [user1, user2, user3]
 
             let txReceipt = await autonomousDegenVC.alphadropPartOfProjectTokens(PROJECT_TOKEN, totalAlphadroppedAmount, lpHolders, { from: deployer })
+        })
+
+        it("capitalizeWithProjectTokens", async () => {
+            /// [Todo]: Replace assigned-value with exact value
+            const capitalizedAmount = web3.utils.toWei('0.1', 'ether')
+
+            let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, capitalizedAmount, { from: deployer })
+            let txReceipt2 = await autonomousDegenVC.capitalizeWithProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, capitalizedAmount, { from: deployer })
         })
     })
 

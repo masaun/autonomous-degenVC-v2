@@ -7,7 +7,7 @@ contract LiquidVaultFactory {
 
     address[] public liquidVaults;
 
-    event LiquidVaultCreated(LiquidVault liquidVault);
+    event LiquidVaultCreated(LiquidVault _liquidVault);
 
     constructor() public {}
 
