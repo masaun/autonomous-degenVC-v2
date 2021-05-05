@@ -3,7 +3,7 @@ const Web3 = require('web3');
 const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8545'))
 
 /// Openzeppelin test-helper
-const { time } = require('@openzeppelin/test-helpers');
+const { time } = require('@openzeppelin/test-helpers')
 
 /// Import deployed-addresses
 const contractAddressList = require("../../migrations/addressesList/contractAddress/contractAddress.js")
@@ -129,6 +129,9 @@ contract("AutonomousDegenVC", function(accounts) {
         it("capitalizeWithProjectTokens", async () => {
             /// [Todo]: Replace assigned-value with exact value
             const capitalizedAmount = web3.utils.toWei('0.1', 'ether')
+
+            const projectTokenBalance = await projectToken.balanceOf(AUTONOMOUS_DEGEN_VC)
+            console.log('=== projectTokenBalance ===', String(projectTokenBalance))
 
             let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, capitalizedAmount, { from: deployer })
             let txReceipt2 = await autonomousDegenVC.capitalizeWithProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, capitalizedAmount, { from: deployer })
