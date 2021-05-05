@@ -107,11 +107,12 @@ contract("AutonomousDegenVC", function(accounts) {
 
         it("createUniswapMarketForProject", async () => {
             /// [Todo]: Replace assigned-value with exact value
-            const amountTokenDesired = web3.utils.toWei('100', 'ether')
-            const amountTokenMin = web3.utils.toWei('10', 'ether')
-            const amountETHMin = web3.utils.toWei('0.01', 'ether')
-            const to = user1
-            const deadline = Date.now() / 1000
+            const amountTokenDesired = web3.utils.toWei('5', 'ether')  /// 5 TPT
+            const amountTokenMin = web3.utils.toWei('5', 'ether')      /// [Note]: Equal to amountTokenDesired because it's the first time we add liquidity
+            const amountETHMin = web3.utils.toWei('0.1', 'ether')      /// 0.1 ETH
+            const to = deployer  /// [Note]: your address, because you're the one who gets the fees later
+            const deadline = Date.now() + 300   /// Now + 300 seconds
+            console.log('=== deadline ===', deadline)  /// e.g). 1620193601002
 
             const ethAmount = web3.utils.toWei('0.1', 'ether')
 
