@@ -76,6 +76,12 @@ contract("AutonomousDegenVC", function(accounts) {
             autonomousDegenVC = await AutonomousDegenVC.new(UNISWAP_V2_PAIR, UNISWAP_V2_ROUTER_02, { from: deployer })
             AUTONOMOUS_DEGEN_VC = autonomousDegenVC.address
         })
+
+        it("[Log]: Deployer-contract addresses", async () => {
+            console.log('=== LIQUID_VAULT_FACTORY ===', LIQUID_VAULT_FACTORY)
+            console.log('=== PROJECT_TOKEN_FACTORY ===', PROJECT_TOKEN_FACTORY)
+            console.log('=== AUTONOMOUS_DEGEN_VC ===', AUTONOMOUS_DEGEN_VC)
+        })
     })
 
     describe("Workflow of the AutonomousDegenVC contract", () => {
@@ -114,9 +120,10 @@ contract("AutonomousDegenVC", function(accounts) {
             const deadline = Date.now() + 300   /// Now + 300 seconds
             console.log('=== deadline ===', deadline)  /// e.g). 1620193601002
 
-            const ethAmount = web3.utils.toWei('0.1', 'ether')
+            const ethAmount = amountETHMin   /// Because it's the first time we add liquidity
 
-            let txReceipt = await autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline, { from: deployer, value: ethAmount })
+            let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, amountTokenDesired, { from: deployer })
+            let txReceipt2 = await autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline, { from: deployer, value: ethAmount })
         })
 
         it("alphadropPartOfProjectTokens", async () => {
@@ -131,8 +138,8 @@ contract("AutonomousDegenVC", function(accounts) {
             /// [Todo]: Replace assigned-value with exact value
             const capitalizedAmount = web3.utils.toWei('0.1', 'ether')
 
-            const projectTokenBalance = await projectToken.balanceOf(AUTONOMOUS_DEGEN_VC)
-            console.log('=== projectTokenBalance ===', String(projectTokenBalance))
+            const projectTokenBalance = await projectToken.balanceOf(deployer)
+            console.log('=== projectTokenBalance (of deployer) ===', String(projectTokenBalance))
 
             let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, capitalizedAmount, { from: deployer })
             let txReceipt2 = await autonomousDegenVC.capitalizeWithProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, capitalizedAmount, { from: deployer })

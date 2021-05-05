@@ -47,6 +47,10 @@ contract AutonomousDegenVC {
         uint deadline
     ) public payable returns (bool) {
         require(msg.value >= amountETHMin, "msg.value should be more than amountETHMin");
+        /// [Note]: In advance, "amountTokenDesired" should be approved in FE
+        projectToken.transferFrom(msg.sender, address(this), amountTokenDesired);
+
+        /// Add ProjectToken/WETH liquidity
         uniswapV2Router02.addLiquidityETH(address(projectToken), amountTokenDesired, amountTokenMin, amountETHMin, to, deadline);
     }
 
