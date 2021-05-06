@@ -7,7 +7,7 @@ contract ProjectTokenFactory {
 
     address[] public projectTokens;
 
-    event ProjectTokenCreated(string name, string symbol, uint initialSupply, ProjectToken projectToken);
+    event ProjectTokenCreated(string name, string symbol, uint initialSupply, ProjectToken _projectToken);
 
     constructor() public {}
 
@@ -19,8 +19,11 @@ contract ProjectTokenFactory {
         string memory symbol, 
         uint256 initialSupply
     ) public returns (bool) {
-        ProjectToken projectToken = new ProjectToken(name, symbol, initialSupply);
+        ProjectToken projectToken = new ProjectToken(name, symbol, initialSupply);        
         projectTokens.push(address(projectToken));
+
+        /// [Note]: Transfer projectTokens into msg.sender 
+        projectToken.transfer(msg.sender, initialSupply);
 
         emit ProjectTokenCreated(name, symbol, initialSupply, projectToken);
     }

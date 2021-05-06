@@ -23,16 +23,21 @@ contract AutonomousDegenVC {
 
     //address[] public lpHolders;  /// UNI LP token (DGVC-ETH) holders address list
 
-    IUniswapV2Pair public lp;    /// UNI LP token (DGVC-ETH)
+    IUniswapV2Pair public lp;    // UNI LP token (DGVC-ETH)
     IUniswapV2Router02 public uniswapV2Router02;
 
-    address UNI_LP_TOKEN;        /// Contract address of UNI LP token (DGVC-ETH)
+    // Contract address of UNI LP token (DGVC-ETH)
+    address UNI_LP_TOKEN;
+
+    // Contract address of UniswapV2Router02.sol
+    address UNISWAP_V2_ROUTER_02;
 
     constructor(IUniswapV2Pair _lp, IUniswapV2Router02 _uniswapV2Router02) public {
         lp = _lp;
         uniswapV2Router02 = _uniswapV2Router02;
 
         UNI_LP_TOKEN = address(lp);
+        UNISWAP_V2_ROUTER_02 = address(uniswapV2Router02);
     }
 
     /**
@@ -47,7 +52,15 @@ contract AutonomousDegenVC {
         uint deadline
     ) public payable returns (bool) {
         require(msg.value >= amountETHMin, "msg.value should be more than amountETHMin");
-        uniswapV2Router02.addLiquidityETH(address(projectToken), amountTokenDesired, amountTokenMin, amountETHMin, to, deadline);
+        /// [Note]: In advance, "amountTokenDesired" should be approved in FE
+        projectToken.transferFrom(msg.sender, address(this), amountTokenDesired);
+
+        /// [Note]: Approve ProjectToken for addLiquidity
+        projectToken.approve(UNISWAP_V2_ROUTER_02, amountTokenDesired);  /// [Note]: Approve ProjectToken for addLiquidity
+
+        /// Add ProjectToken/WETH liquidity
+        /// [Note]: This contract itself has to transfer ETH into UniswapV2Router02 contract
+        uniswapV2Router02.addLiquidityETH{ value: msg.value }(address(projectToken), amountTokenDesired, amountTokenMin, amountETHMin, to, deadline);
     }
 
     /**

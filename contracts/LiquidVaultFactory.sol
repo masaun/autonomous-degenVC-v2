@@ -7,6 +7,8 @@ contract LiquidVaultFactory {
 
     address[] public liquidVaults;
 
+    event LiquidVaultCreated(LiquidVault _liquidVault);
+
     constructor() public {}
 
     /**
@@ -32,6 +34,8 @@ contract LiquidVaultFactory {
                          donationShare,   // LP Token
                          purchaseFee);    // ETH
         liquidVaults.push(address(liquidVault));
+
+        emit LiquidVaultCreated(liquidVault);
     }
 
 }
