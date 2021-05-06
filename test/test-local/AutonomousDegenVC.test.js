@@ -112,7 +112,6 @@ contract("AutonomousDegenVC", function(accounts) {
         })
 
         it("createUniswapMarketForProject", async () => {
-            /// [Todo]: Replace assigned-value with exact value
             const amountTokenDesired = web3.utils.toWei('5', 'ether')  /// 5 TPT
             const amountTokenMin = web3.utils.toWei('5', 'ether')      /// [Note]: Equal to amountTokenDesired because it's the first time we add liquidity
             const amountETHMin = web3.utils.toWei('0.1', 'ether')      /// 0.1 ETH
@@ -144,6 +143,22 @@ contract("AutonomousDegenVC", function(accounts) {
             let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, capitalizedAmount, { from: deployer })
             let txReceipt2 = await autonomousDegenVC.capitalizeWithProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, capitalizedAmount, { from: deployer })
         })
+    })
+
+    describe("Check final result", () => {
+        it("ProjectTokens should be distributed into all UNI-LP token (DGVC-ETH) holders", async () => {
+            const lpHolder1 = user1
+            const lpHolder2 = user2
+            const lpHolder3 = user3
+
+            let projectTokenBalance1 = await projectToken.balanceOf(lpHolder1)
+            let projectTokenBalance2 = await projectToken.balanceOf(lpHolder2)
+            let projectTokenBalance3 = await projectToken.balanceOf(lpHolder3)            
+
+            console.log('=== projectTokenBalance (of UNI-LP Token Holder1) ===', String(projectTokenBalance1))
+            console.log('=== projectTokenBalance (of UNI-LP Token Holder2) ===', String(projectTokenBalance2))
+            console.log('=== projectTokenBalance (of UNI-LP Token Holder3) ===', String(projectTokenBalance3))
+        })        
     })
 
 })
