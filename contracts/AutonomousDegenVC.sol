@@ -55,9 +55,12 @@ contract AutonomousDegenVC {
         /// [Note]: In advance, "amountTokenDesired" should be approved in FE
         projectToken.transferFrom(msg.sender, address(this), amountTokenDesired);
 
-        /// Add ProjectToken/WETH liquidity
+        /// [Note]: Approve ProjectToken for addLiquidity
         projectToken.approve(UNISWAP_V2_ROUTER_02, amountTokenDesired);  /// [Note]: Approve ProjectToken for addLiquidity
-        uniswapV2Router02.addLiquidityETH(address(projectToken), amountTokenDesired, amountTokenMin, amountETHMin, to, deadline);
+
+        /// Add ProjectToken/WETH liquidity
+        /// [Note]: This contract itself has to transfer ETH into UniswapV2Router02 contract
+        uniswapV2Router02.addLiquidityETH{ value: msg.value }(address(projectToken), amountTokenDesired, amountTokenMin, amountETHMin, to, deadline);
     }
 
     /**
