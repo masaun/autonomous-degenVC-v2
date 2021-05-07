@@ -141,11 +141,13 @@ contract("AutonomousDegenVC", function(accounts) {
             const lpHolders = [user1, user2, user3]
 
             /// [Todo]: Create LP instance
-            LP = uniswapV2Factory.getPair(PROJECT_TOKEN, WETH)
-            lp = IUniswapV2Pair.at(LP)
+            LP = await uniswapV2Factory.getPair(PROJECT_TOKEN, WETH)
+            lp = await IUniswapV2Pair.at(LP)
+            console.log('=== UNI-LP (DGVC-ETH) token address ===', LP)
 
             /// [Todo]: Check share of LPs
             const totalSupplyOfLp = await lp.totalSupply()
+            console.log('=== totalSupply of UNI-LP (DGVC-ETH) token ===', String(totalSupplyOfLp))
 
             let txReceipt = await autonomousDegenVC.alphadropPartOfProjectTokens(PROJECT_TOKEN, totalAlphadroppedAmount, lpHolders, { from: deployer })
         })
