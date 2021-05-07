@@ -111,7 +111,7 @@ contract("AutonomousDegenVC", function(accounts) {
             console.log('=== LIQUID_VAULT ===', LIQUID_VAULT)
         })
 
-        it("createUniswapMarketForProject", async () => {
+        it("[Step 1]: A uniswap market is created for the new project", async () => {
             const amountTokenDesired = web3.utils.toWei('5', 'ether')  /// 5 TPT
             const amountTokenMin = web3.utils.toWei('5', 'ether')      /// [Note]: Equal to amountTokenDesired because it's the first time we add liquidity
             const amountETHMin = web3.utils.toWei('0.1', 'ether')      /// 0.1 ETH
@@ -125,7 +125,7 @@ contract("AutonomousDegenVC", function(accounts) {
             let txReceipt2 = await autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline, { from: deployer, value: ethAmount })
         })
 
-        it("alphadropPartOfProjectTokens", async () => {
+        it("[Step 2]: Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP", async () => {
             /// [Todo]: Replace assigned-value with exact value
             const totalAlphadroppedAmount = 0
             const lpHolders = [user1, user2, user3]
@@ -133,7 +133,7 @@ contract("AutonomousDegenVC", function(accounts) {
             let txReceipt = await autonomousDegenVC.alphadropPartOfProjectTokens(PROJECT_TOKEN, totalAlphadroppedAmount, lpHolders, { from: deployer })
         })
 
-        it("capitalizeWithProjectTokens", async () => {
+        it("[Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
             /// [Todo]: Replace assigned-value with exact value
             const capitalizedAmount = web3.utils.toWei('0.1', 'ether')
 
