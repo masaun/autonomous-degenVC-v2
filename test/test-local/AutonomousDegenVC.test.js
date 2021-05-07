@@ -149,7 +149,7 @@ contract("AutonomousDegenVC", function(accounts) {
             const totalSupplyOfLp = await lp.totalSupply()
             console.log('=== totalSupply of UNI-LP (DGVC-ETH) token ===', String(totalSupplyOfLp))
 
-            let txReceipt = await autonomousDegenVC.alphadropPartOfProjectTokens(PROJECT_TOKEN, totalAlphadroppedAmount, lpHolders, { from: deployer })
+            let txReceipt = await autonomousDegenVC.alphadropPartOfProjectTokens(PROJECT_TOKEN, totalSupplyOfLp, lpHolders, { from: deployer })
         })
 
         it("[Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
