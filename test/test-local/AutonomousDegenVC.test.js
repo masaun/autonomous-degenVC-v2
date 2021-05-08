@@ -15,11 +15,14 @@ const LiquidVaultFactory = artifacts.require("LiquidVaultFactory")
 const ProjectTokenFactory = artifacts.require("ProjectTokenFactory")
 const LiquidVault = artifacts.require("LiquidVault")
 const ProjectToken = artifacts.require("ProjectToken")
+const IUniswapV2Pair = artifacts.require("IUniswapV2Pair")
+const IUniswapV2Factory = artifacts.require("IUniswapV2Factory")
 
 /// Deployed-addresses
 const UNISWAP_V2_PAIR = "0x7CDc560CC66126a5Eb721e444abC30EB85408f7A"  /// UNI-LP Token (DGVC - ETH pair)
 const UNISWAP_V2_ROUTER_02 = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"
-
+const UNISWAP_V2_FACTORY = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"
+const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"  /// Wrappered ETH (ERC20)
 
 /**
  * @notice - This is the test of AutonomousDegenVC.sol
@@ -38,6 +41,8 @@ contract("AutonomousDegenVC", function(accounts) {
     let projectTokenFactory
     let liquidVault
     let projectToken
+    let lp  /// UniswapV2Pair
+    let uniswapV2Factory
 
     /// Global variable for each contract addresses
     let AUTONOMOUS_DEGEN_VC
@@ -77,10 +82,15 @@ contract("AutonomousDegenVC", function(accounts) {
             AUTONOMOUS_DEGEN_VC = autonomousDegenVC.address
         })
 
+        it("Create the UniswapV2Factory contract instance", async () => {
+            uniswapV2Factory = await IUniswapV2Factory.at(UNISWAP_V2_FACTORY)
+        })
+
         it("[Log]: Deployer-contract addresses", async () => {
             console.log('=== LIQUID_VAULT_FACTORY ===', LIQUID_VAULT_FACTORY)
             console.log('=== PROJECT_TOKEN_FACTORY ===', PROJECT_TOKEN_FACTORY)
             console.log('=== AUTONOMOUS_DEGEN_VC ===', AUTONOMOUS_DEGEN_VC)
+            console.log('=== UNISWAP_V2_FACTORY ===', UNISWAP_V2_FACTORY)
         })
     })
 
@@ -111,8 +121,7 @@ contract("AutonomousDegenVC", function(accounts) {
             console.log('=== LIQUID_VAULT ===', LIQUID_VAULT)
         })
 
-        it("createUniswapMarketForProject", async () => {
-            /// [Todo]: Replace assigned-value with exact value
+        it("[Step 1]: A uniswap market is created for the new project", async () => {
             const amountTokenDesired = web3.utils.toWei('5', 'ether')  /// 5 TPT
             const amountTokenMin = web3.utils.toWei('5', 'ether')      /// [Note]: Equal to amountTokenDesired because it's the first time we add liquidity
             const amountETHMin = web3.utils.toWei('0.1', 'ether')      /// 0.1 ETH
@@ -126,15 +135,24 @@ contract("AutonomousDegenVC", function(accounts) {
             let txReceipt2 = await autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline, { from: deployer, value: ethAmount })
         })
 
-        it("alphadropPartOfProjectTokens", async () => {
+        it("[Step 2]: Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP", async () => {
             /// [Todo]: Replace assigned-value with exact value
-            const totalAlphadroppedAmount = 0
+            const totalAlphadroppedAmount = web3.utils.toWei('3', 'ether')  /// 3 TPT
             const lpHolders = [user1, user2, user3]
 
-            let txReceipt = await autonomousDegenVC.alphadropPartOfProjectTokens(PROJECT_TOKEN, totalAlphadroppedAmount, lpHolders, { from: deployer })
+            /// [Todo]: Create LP instance
+            LP = await uniswapV2Factory.getPair(PROJECT_TOKEN, WETH)
+            lp = await IUniswapV2Pair.at(LP)
+            console.log('=== UNI-LP (DGVC-ETH) token address ===', LP)
+
+            /// [Todo]: Check share of LPs
+            const totalSupplyOfLp = await lp.totalSupply()
+            console.log('=== totalSupply of UNI-LP (DGVC-ETH) token ===', String(totalSupplyOfLp))
+
+            let txReceipt = await autonomousDegenVC.alphadropPartOfProjectTokens(PROJECT_TOKEN, totalSupplyOfLp, lpHolders, { from: deployer })
         })
 
-        it("capitalizeWithProjectTokens", async () => {
+        it("[Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
             /// [Todo]: Replace assigned-value with exact value
             const capitalizedAmount = web3.utils.toWei('0.1', 'ether')
 
@@ -144,6 +162,22 @@ contract("AutonomousDegenVC", function(accounts) {
             let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, capitalizedAmount, { from: deployer })
             let txReceipt2 = await autonomousDegenVC.capitalizeWithProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, capitalizedAmount, { from: deployer })
         })
+    })
+
+    describe("Check final result", () => {
+        it("ProjectTokens should be distributed into all UNI-LP token (DGVC-ETH) holders", async () => {
+            const lpHolder1 = user1
+            const lpHolder2 = user2
+            const lpHolder3 = user3
+
+            let projectTokenBalance1 = await projectToken.balanceOf(lpHolder1)
+            let projectTokenBalance2 = await projectToken.balanceOf(lpHolder2)
+            let projectTokenBalance3 = await projectToken.balanceOf(lpHolder3)            
+
+            console.log('=== projectTokenBalance (of UNI-LP Token Holder1) ===', String(projectTokenBalance1))
+            console.log('=== projectTokenBalance (of UNI-LP Token Holder2) ===', String(projectTokenBalance2))
+            console.log('=== projectTokenBalance (of UNI-LP Token Holder3) ===', String(projectTokenBalance3))
+        })        
     })
 
 })

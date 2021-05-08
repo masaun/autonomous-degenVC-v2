@@ -32,6 +32,9 @@ contract AutonomousDegenVC {
     // Contract address of UniswapV2Router02.sol
     address UNISWAP_V2_ROUTER_02;
 
+    // Define the rate of alphadrop
+    uint alphadroppedRate = 10;   /// 10%
+
     constructor(IUniswapV2Pair _lp, IUniswapV2Router02 _uniswapV2Router02) public {
         lp = _lp;
         uniswapV2Router02 = _uniswapV2Router02;
@@ -68,11 +71,15 @@ contract AutonomousDegenVC {
      */    
     function alphadropPartOfProjectTokens(
         IProjectToken projectToken, 
-        uint totalAlphadroppedAmount, 
+        uint totalSupplyOfLp,
+        //uint totalAlphadroppedAmount, 
         address[] memory lpHolders  // [Note]: Assign UNI-LP token holders (= DGVC-ETH pair) from front-end
     ) public returns (bool) {
         // [Todo]: Identify UNI-LP token holders (= DGVC-ETH pair)
         //address[] memory lpHolders = getLpHolders();
+
+        // Calculate total alphadropped-amount of the ProjectTokens
+        uint totalAlphadroppedAmount = totalSupplyOfLp.mul(alphadroppedRate).div(100);
 
         // The ProjectTokens are alphadropped into each UNI-LP token holders
         for (uint i=0; i < lpHolders.length; i++) {
