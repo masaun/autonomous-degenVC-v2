@@ -15,6 +15,7 @@ const LiquidVaultFactory = artifacts.require("LiquidVaultFactory")
 const ProjectTokenFactory = artifacts.require("ProjectTokenFactory")
 const LiquidVault = artifacts.require("LiquidVault")
 const ProjectToken = artifacts.require("ProjectToken")
+const MockLpToken = artifacts.require("MockLpToken")
 const IUniswapV2Pair = artifacts.require("IUniswapV2Pair")
 const IUniswapV2Factory = artifacts.require("IUniswapV2Factory")
 
@@ -41,7 +42,8 @@ contract("AutonomousDegenVC", function(accounts) {
     let projectTokenFactory
     let liquidVault
     let projectToken
-    let lp  /// UniswapV2Pair
+    let lp          /// UniswapV2Pair (ProjectToken-ETH pair)
+    let lpDgvcEth   /// UniswapV2Pair (DGVC-ETH pair)
     let uniswapV2Factory
 
     /// Global variable for each contract addresses
@@ -50,6 +52,8 @@ contract("AutonomousDegenVC", function(accounts) {
     let PROJECT_TOKEN_FACTORY
     let LIQUID_VAULT
     let PROJECT_TOKEN
+    let LP              /// UniswapV2Pair (ProjectToken-ETH pair)
+    let LP_DGVC_ETH     /// UniswapV2Pair (DGVC-ETH pair)
 
     async function getEvents(contractInstance, eventName) {
         const _latestBlock = await time.latestBlock()
@@ -67,6 +71,21 @@ contract("AutonomousDegenVC", function(accounts) {
     } 
 
     describe("Setup smart-contracts", () => {
+        it("Deploy the UNI-V2 LP Token (DGVC-ETH pair) contract instance", async () => {
+            lpDgvcEth = await MockLpToken.new({ from: deployer })
+            LP_DGVC_ETH = lpDgvcEth.address
+        })
+
+        it("Transfer the UNI-V2 LP Tokens (DGVC-ETH pair) into 3 users in order to set up LP token holders", async () => {
+            const amount1 = web3.utils.toWei("1000", "ether")
+            const amount2 = web3.utils.toWei("2000", "ether")
+            const amount3 = web3.utils.toWei("3000", "ether")
+
+            let txReceipt1 = await lpDgvcEth.transfer(user1, amount1, { from: deployer })
+            let txReceipt2 = await lpDgvcEth.transfer(user2, amount2, { from: deployer })
+            let txReceipt3 = await lpDgvcEth.transfer(user3, amount3, { from: deployer })
+        })
+
         it("Deploy the LiquidVaultFactory contract instance", async () => {
             liquidVaultFactory = await LiquidVaultFactory.new({ from: deployer })
             LIQUID_VAULT_FACTORY = liquidVaultFactory.address
@@ -91,6 +110,15 @@ contract("AutonomousDegenVC", function(accounts) {
             console.log('=== PROJECT_TOKEN_FACTORY ===', PROJECT_TOKEN_FACTORY)
             console.log('=== AUTONOMOUS_DEGEN_VC ===', AUTONOMOUS_DEGEN_VC)
             console.log('=== UNISWAP_V2_FACTORY ===', UNISWAP_V2_FACTORY)
+        })
+
+        it("[Log]: the UNI-V2 LP Token (DGVC-ETH pair) balance of 3 users", async () => {
+            const balance1 = await lpDgvcEth.balanceOf(user1)
+            const balance2 = await lpDgvcEth.balanceOf(user2)
+            const balance3 = await lpDgvcEth.balanceOf(user3)
+            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair) balance of user1 ===', String(balance1))
+            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair) balance of user2 ===', String(balance2))
+            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair) balance of user3 ===', String(balance3))
         })
     })
 
@@ -136,18 +164,19 @@ contract("AutonomousDegenVC", function(accounts) {
         })
 
         it("[Step 2]: Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP", async () => {
-            /// [Todo]: Replace assigned-value with exact value
             const totalAlphadroppedAmount = web3.utils.toWei('3', 'ether')  /// 3 TPT
             const lpHolders = [user1, user2, user3]
 
-            /// [Todo]: Create LP instance
+            /// Create LP instance
             LP = await uniswapV2Factory.getPair(PROJECT_TOKEN, WETH)
             lp = await IUniswapV2Pair.at(LP)
             console.log('=== UNI-LP (DGVC-ETH) token address ===', LP)
 
-            /// [Todo]: Check share of LPs
+            /// Check totalSupply of LPs
             const totalSupplyOfLp = await lp.totalSupply()
             console.log('=== totalSupply of UNI-LP (DGVC-ETH) token ===', String(totalSupplyOfLp))
+
+            /// [Todo]: Check share of LPs
 
             let txReceipt = await autonomousDegenVC.alphadropPartOfProjectTokens(PROJECT_TOKEN, totalSupplyOfLp, lpHolders, { from: deployer })
         })
