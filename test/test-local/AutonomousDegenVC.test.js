@@ -136,18 +136,19 @@ contract("AutonomousDegenVC", function(accounts) {
         })
 
         it("[Step 2]: Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP", async () => {
-            /// [Todo]: Replace assigned-value with exact value
             const totalAlphadroppedAmount = web3.utils.toWei('3', 'ether')  /// 3 TPT
             const lpHolders = [user1, user2, user3]
 
-            /// [Todo]: Create LP instance
+            /// Create LP instance
             LP = await uniswapV2Factory.getPair(PROJECT_TOKEN, WETH)
             lp = await IUniswapV2Pair.at(LP)
             console.log('=== UNI-LP (DGVC-ETH) token address ===', LP)
 
-            /// [Todo]: Check share of LPs
+            /// Check totalSupply of LPs
             const totalSupplyOfLp = await lp.totalSupply()
             console.log('=== totalSupply of UNI-LP (DGVC-ETH) token ===', String(totalSupplyOfLp))
+
+            /// [Todo]: Check share of LPs
 
             let txReceipt = await autonomousDegenVC.alphadropPartOfProjectTokens(PROJECT_TOKEN, totalSupplyOfLp, lpHolders, { from: deployer })
         })
