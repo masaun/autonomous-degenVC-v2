@@ -173,12 +173,15 @@ contract("AutonomousDegenVC", function(accounts) {
             console.log('=== UNI-LP token (ProjecToken-ETH pair) address ===', LP)
 
             /// Check totalSupply of LPs (ProjecToken-ETH pair)
-            const totalSupplyOfLp = await lp.totalSupply()
-            console.log('=== totalSupply of UNI-LP (ProjecToken-ETH pair) token ===', String(totalSupplyOfLp))
+            //const totalSupplyOfLp = await lp.totalSupply()
+            //console.log('=== totalSupply of UNI-LP (ProjecToken-ETH pair) token ===', String(totalSupplyOfLp))
 
-            /// [Todo]: Check share of LPs
+            /// Check totalSupply of ProjectTokens
+            const depositProjectTokenAmount = await projectToken.balanceOf(deployer)
+            console.log('=== deposited-ProjectToken amount ===', String(depositProjectTokenAmount))
 
-            let txReceipt = await autonomousDegenVC.alphadropPartOfProjectTokens(PROJECT_TOKEN, totalSupplyOfLp, lpHolders, { from: deployer })
+            let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, depositProjectTokenAmount, { from: deployer })
+            let txReceipt2 = await autonomousDegenVC.alphadropPartOfProjectTokens(PROJECT_TOKEN, depositProjectTokenAmount, lpHolders, { from: deployer })
         })
 
         it("[Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
