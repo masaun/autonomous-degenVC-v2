@@ -167,14 +167,14 @@ contract("AutonomousDegenVC", function(accounts) {
             const totalAlphadroppedAmount = web3.utils.toWei('3', 'ether')  /// 3 TPT
             const lpHolders = [user1, user2, user3]
 
-            /// Create LP instance
+            /// Create LP token (ProjecToken-ETH pair) instance
             LP = await uniswapV2Factory.getPair(PROJECT_TOKEN, WETH)
             lp = await IUniswapV2Pair.at(LP)
-            console.log('=== UNI-LP (DGVC-ETH) token address ===', LP)
+            console.log('=== UNI-LP token (ProjecToken-ETH pair) address ===', LP)
 
-            /// Check totalSupply of LPs
+            /// Check totalSupply of LPs (ProjecToken-ETH pair)
             const totalSupplyOfLp = await lp.totalSupply()
-            console.log('=== totalSupply of UNI-LP (DGVC-ETH) token ===', String(totalSupplyOfLp))
+            console.log('=== totalSupply of UNI-LP (ProjecToken-ETH pair) token ===', String(totalSupplyOfLp))
 
             /// [Todo]: Check share of LPs
 

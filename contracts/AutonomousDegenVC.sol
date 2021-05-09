@@ -23,11 +23,11 @@ contract AutonomousDegenVC {
 
     //address[] public lpHolders;  /// UNI LP token (DGVC-ETH) holders address list
 
-    IUniswapV2Pair public lp;    // UNI LP token (DGVC-ETH)
+    IUniswapV2Pair public lpDgvcEth;    // UNI LP token (DGVC-ETH)
     IUniswapV2Router02 public uniswapV2Router02;
 
     // Contract address of UNI LP token (DGVC-ETH)
-    address UNI_LP_TOKEN;
+    address UNI_LP_DGVC_ETH;
 
     // Contract address of UniswapV2Router02.sol
     address UNISWAP_V2_ROUTER_02;
@@ -35,11 +35,11 @@ contract AutonomousDegenVC {
     // Define the rate of alphadrop
     uint alphadroppedRate = 10;   /// 10%
 
-    constructor(IUniswapV2Pair _lp, IUniswapV2Router02 _uniswapV2Router02) public {
-        lp = _lp;
+    constructor(IUniswapV2Pair _lpDgvcEth, IUniswapV2Router02 _uniswapV2Router02) public {
+        lpDgvcEth = _lpDgvcEth;
         uniswapV2Router02 = _uniswapV2Router02;
 
-        UNI_LP_TOKEN = address(lp);
+        UNI_LP_DGVC_ETH = address(lpDgvcEth);
         UNISWAP_V2_ROUTER_02 = address(uniswapV2Router02);
     }
 
@@ -68,12 +68,13 @@ contract AutonomousDegenVC {
 
     /**
      * @notice - Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP;
+     * @param totalSupplyOfLp - totalSupply of LP tokens (ProjecToken-ETH pair)
      */    
     function alphadropPartOfProjectTokens(
         IProjectToken projectToken, 
         uint totalSupplyOfLp,
         //uint totalAlphadroppedAmount, 
-        address[] memory lpHolders  // [Note]: Assign UNI-LP token holders (= DGVC-ETH pair) from front-end
+        address[] memory lpDgvcEthHolders  // [Note]: Assign UNI-LP token holders (= DGVC-ETH pair) from front-end
     ) public returns (bool) {
         // [Todo]: Identify UNI-LP token holders (= DGVC-ETH pair)
         //address[] memory lpHolders = getLpHolders();
@@ -82,17 +83,17 @@ contract AutonomousDegenVC {
         uint totalAlphadroppedAmount = totalSupplyOfLp.mul(alphadroppedRate).div(100);
 
         // The ProjectTokens are alphadropped into each UNI-LP token holders
-        for (uint i=0; i < lpHolders.length; i++) {
-            address lpHolder = lpHolders[i];
-            uint lpBalance = lp.balanceOf(lpHolder);
-            uint lpTotalSupply = lp.totalSupply();
+        for (uint i=0; i < lpDgvcEthHolders.length; i++) {
+            address lpDgvcEthHolder = lpDgvcEthHolders[i];
+            uint lpDgvcEthBalance = lpDgvcEth.balanceOf(lpDgvcEthHolder);
+            uint lpDgvcEthTotalSupply = lpDgvcEth.totalSupply();
 
             // Identify share of the LPs
-            uint shareOfLp = lpBalance.div(lpTotalSupply).mul(100);
+            uint shareOfLpDgvcEth = lpDgvcEthBalance.div(lpDgvcEthTotalSupply).mul(100);
 
-            uint alphadroppedAmount = totalAlphadroppedAmount.mul(shareOfLp).div(100);
+            uint alphadroppedAmount = totalAlphadroppedAmount.mul(shareOfLpDgvcEth).div(100);
 
-            projectToken.transfer(lpHolder, alphadroppedAmount);
+            projectToken.transfer(lpDgvcEthHolder, alphadroppedAmount);
         }
     }
 
