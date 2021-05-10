@@ -93,16 +93,15 @@ contract AutonomousDegenVC {
 
             // Identify share of the LPs
             uint shareOfLpDgvcEth = lpDgvcEthBalance.div(lpDgvcEthTotalSupply).mul(100);
-
             uint alphadroppedAmount = totalAlphadroppedAmount.mul(shareOfLpDgvcEth).div(100);
-
             projectToken.transfer(lpDgvcEthHolder, alphadroppedAmount);
-
-            // Capitalize with remained-ProjectTokens
-            uint capitalizedAmount = projectToken.balanceOf(address(this));
-            //uint capitalizedAmount = depositProjectTokenAmount.sub(totalAlphadroppedAmount);
-            capitalizeWithProjectTokens(liquidVault, projectToken, capitalizedAmount);
+            //projectToken.transfer(lpDgvcEthHolder, 1);
         }
+
+        // Capitalize with remained-ProjectTokens (Transfer remained-ProjectTokens into the LiquidVault)
+        uint capitalizedAmount = projectToken.balanceOf(address(this));
+        //uint capitalizedAmount = depositProjectTokenAmount.sub(totalAlphadroppedAmount);
+        capitalizeWithProjectTokens(liquidVault, projectToken, capitalizedAmount);
     }
 
     /**
