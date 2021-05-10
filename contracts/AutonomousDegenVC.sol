@@ -99,7 +99,8 @@ contract AutonomousDegenVC {
             projectToken.transfer(lpDgvcEthHolder, alphadroppedAmount);
 
             // Capitalize with remained-ProjectTokens
-            uint capitalizedAmount = depositProjectTokenAmount.sub(totalAlphadroppedAmount);
+            uint capitalizedAmount = projectToken.balanceOf(address(this));
+            //uint capitalizedAmount = depositProjectTokenAmount.sub(totalAlphadroppedAmount);
             capitalizeWithProjectTokens(liquidVault, projectToken, capitalizedAmount);
         }
     }
