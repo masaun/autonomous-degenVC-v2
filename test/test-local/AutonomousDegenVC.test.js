@@ -97,7 +97,8 @@ contract("AutonomousDegenVC", function(accounts) {
         })
 
         it("Deploy the AutonomousDegenVC contract instance", async () => {
-            autonomousDegenVC = await AutonomousDegenVC.new(UNISWAP_V2_PAIR, UNISWAP_V2_ROUTER_02, { from: deployer })
+            autonomousDegenVC = await AutonomousDegenVC.new(LP_DGVC_ETH, UNISWAP_V2_ROUTER_02, { from: deployer })
+            //autonomousDegenVC = await AutonomousDegenVC.new(UNISWAP_V2_PAIR, UNISWAP_V2_ROUTER_02, { from: deployer })
             AUTONOMOUS_DEGEN_VC = autonomousDegenVC.address
         })
 
@@ -165,7 +166,7 @@ contract("AutonomousDegenVC", function(accounts) {
 
         it("[Step 2]: Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP + [Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
             const totalAlphadroppedAmount = web3.utils.toWei('3', 'ether')  /// 3 TPT
-            const lpHolders = [user1, user2, user3]
+            const lpDgvcEthHolders = [user1, user2, user3]  // [Note]: Assign UNI-LP token holders (= DGVC-ETH pair)
 
             /// Create LP token (ProjecToken-ETH pair) instance
             LP = await uniswapV2Factory.getPair(PROJECT_TOKEN, WETH)
@@ -181,7 +182,11 @@ contract("AutonomousDegenVC", function(accounts) {
             console.log('=== deposited-ProjectToken amount ===', String(depositProjectTokenAmount))
 
             let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, depositProjectTokenAmount, { from: deployer })
-            let txReceipt2 = await autonomousDegenVC.alphadropPartOfProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, depositProjectTokenAmount, lpHolders, { from: deployer })
+            let txReceipt2 = await autonomousDegenVC.alphadropPartOfProjectTokens(LIQUID_VAULT, 
+                                                                                  PROJECT_TOKEN, 
+                                                                                  depositProjectTokenAmount, 
+                                                                                  lpDgvcEthHolders, 
+                                                                                  { from: deployer })
         })
 
         // it("[Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {

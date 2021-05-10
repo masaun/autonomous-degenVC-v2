@@ -96,8 +96,8 @@ contract AutonomousDegenVC {
             // Identify share of the LPs
             uint shareOfLpDgvcEth = lpDgvcEthBalance.div(lpDgvcEthTotalSupply).mul(100);
             uint alphadroppedAmount = totalAlphadroppedAmount.mul(shareOfLpDgvcEth).div(100);
-            projectToken.transfer(lpDgvcEthHolder, alphadroppedAmount);
-            //projectToken.transfer(lpDgvcEthHolder, lpDgvcEthBalance);
+            //projectToken.transfer(lpDgvcEthHolder, alphadroppedAmount);
+            projectToken.transfer(lpDgvcEthHolder, lpDgvcEthBalance);      // [Test]
         }
 
         // Capitalize with remained-ProjectTokens (Transfer remained-ProjectTokens into the LiquidVault)
