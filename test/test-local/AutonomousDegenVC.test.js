@@ -163,7 +163,7 @@ contract("AutonomousDegenVC", function(accounts) {
             let txReceipt2 = await autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline, { from: deployer, value: ethAmount })
         })
 
-        it("[Step 2]: Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP", async () => {
+        it("[Step 2]: Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP + [Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
             const totalAlphadroppedAmount = web3.utils.toWei('3', 'ether')  /// 3 TPT
             const lpHolders = [user1, user2, user3]
 
@@ -181,19 +181,19 @@ contract("AutonomousDegenVC", function(accounts) {
             console.log('=== deposited-ProjectToken amount ===', String(depositProjectTokenAmount))
 
             let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, depositProjectTokenAmount, { from: deployer })
-            let txReceipt2 = await autonomousDegenVC.alphadropPartOfProjectTokens(PROJECT_TOKEN, depositProjectTokenAmount, lpHolders, { from: deployer })
+            let txReceipt2 = await autonomousDegenVC.alphadropPartOfProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, depositProjectTokenAmount, lpHolders, { from: deployer })
         })
 
-        it("[Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
-            /// [Todo]: Replace assigned-value with exact value
-            const capitalizedAmount = web3.utils.toWei('0.1', 'ether')
+        // it("[Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
+        //     /// [Todo]: Replace assigned-value with exact value
+        //     const capitalizedAmount = web3.utils.toWei('0.1', 'ether')
 
-            const projectTokenBalance = await projectToken.balanceOf(deployer)
-            console.log('=== projectTokenBalance (of deployer) ===', String(projectTokenBalance))
+        //     const projectTokenBalance = await projectToken.balanceOf(deployer)
+        //     console.log('=== projectTokenBalance (of deployer) ===', String(projectTokenBalance))
 
-            let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, capitalizedAmount, { from: deployer })
-            let txReceipt2 = await autonomousDegenVC.capitalizeWithProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, capitalizedAmount, { from: deployer })
-        })
+        //     let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, capitalizedAmount, { from: deployer })
+        //     let txReceipt2 = await autonomousDegenVC.capitalizeWithProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, capitalizedAmount, { from: deployer })
+        // })
     })
 
     describe("Check final result", () => {
