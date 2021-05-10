@@ -167,18 +167,21 @@ contract("AutonomousDegenVC", function(accounts) {
             const totalAlphadroppedAmount = web3.utils.toWei('3', 'ether')  /// 3 TPT
             const lpHolders = [user1, user2, user3]
 
-            /// Create LP instance
+            /// Create LP token (ProjecToken-ETH pair) instance
             LP = await uniswapV2Factory.getPair(PROJECT_TOKEN, WETH)
             lp = await IUniswapV2Pair.at(LP)
-            console.log('=== UNI-LP (DGVC-ETH) token address ===', LP)
+            console.log('=== UNI-LP token (ProjecToken-ETH pair) address ===', LP)
 
-            /// Check totalSupply of LPs
-            const totalSupplyOfLp = await lp.totalSupply()
-            console.log('=== totalSupply of UNI-LP (DGVC-ETH) token ===', String(totalSupplyOfLp))
+            /// Check totalSupply of LPs (ProjecToken-ETH pair)
+            //const totalSupplyOfLp = await lp.totalSupply()
+            //console.log('=== totalSupply of UNI-LP (ProjecToken-ETH pair) token ===', String(totalSupplyOfLp))
 
-            /// [Todo]: Check share of LPs
+            /// Check totalSupply of ProjectTokens
+            const depositProjectTokenAmount = await projectToken.balanceOf(deployer)
+            console.log('=== deposited-ProjectToken amount ===', String(depositProjectTokenAmount))
 
-            let txReceipt = await autonomousDegenVC.alphadropPartOfProjectTokens(PROJECT_TOKEN, totalSupplyOfLp, lpHolders, { from: deployer })
+            let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, depositProjectTokenAmount, { from: deployer })
+            let txReceipt2 = await autonomousDegenVC.alphadropPartOfProjectTokens(PROJECT_TOKEN, depositProjectTokenAmount, lpHolders, { from: deployer })
         })
 
         it("[Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
