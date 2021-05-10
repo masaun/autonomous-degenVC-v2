@@ -104,8 +104,6 @@ contract AutonomousDegenVC {
      */
     function capitalizeWithProjectTokens(LiquidVault liquidVault, IProjectToken projectToken, uint capitalizedAmount) public returns (bool) {
         address LIQUID_VAULT = address(liquidVault);
-
-        projectToken.transferFrom(msg.sender, address(this), capitalizedAmount);
         projectToken.transfer(LIQUID_VAULT, capitalizedAmount);
     }
 
