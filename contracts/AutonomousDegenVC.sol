@@ -70,6 +70,7 @@ contract AutonomousDegenVC {
      * @notice - Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP;
      */    
     function alphadropPartOfProjectTokens(
+        LiquidVault liquidVault,
         IProjectToken projectToken, 
         uint depositProjectTokenAmount,
         //uint totalAlphadroppedAmount, 
@@ -96,6 +97,10 @@ contract AutonomousDegenVC {
             uint alphadroppedAmount = totalAlphadroppedAmount.mul(shareOfLpDgvcEth).div(100);
 
             projectToken.transfer(lpDgvcEthHolder, alphadroppedAmount);
+
+            // Capitalize with remained-ProjectTokens
+            uint capitalizedAmount = depositProjectTokenAmount.sub(totalAlphadroppedAmount);
+            capitalizeWithProjectTokens(liquidVault, projectToken, capitalizedAmount);
         }
     }
 
