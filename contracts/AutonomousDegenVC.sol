@@ -3,6 +3,7 @@ pragma solidity 0.7.4;
 
 import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 
+import { MockLpToken } from "./mock/MockLpToken.sol";  /// [Note]: This is a mock UNI-V2 LP token (DGVC-ETH pair)
 import { IProjectToken } from "./IProjectToken.sol";
 import { LiquidVault } from "./degen-vc/LiquidVault.sol";
 
@@ -23,7 +24,8 @@ contract AutonomousDegenVC {
 
     //address[] public lpHolders;  /// UNI LP token (DGVC-ETH) holders address list
 
-    IUniswapV2Pair public lpDgvcEth;    // UNI LP token (DGVC-ETH)
+    MockLpToken public lpDgvcEth;         // UNI LP token (DGVC-ETH)
+    //IUniswapV2Pair public lpDgvcEth;    // UNI LP token (DGVC-ETH)
     IUniswapV2Router02 public uniswapV2Router02;
 
     // Contract address of UNI LP token (DGVC-ETH)
@@ -35,7 +37,7 @@ contract AutonomousDegenVC {
     // Define the rate of alphadrop
     uint alphadroppedRate = 10;   /// 10%
 
-    constructor(IUniswapV2Pair _lpDgvcEth, IUniswapV2Router02 _uniswapV2Router02) public {
+    constructor(MockLpToken _lpDgvcEth, IUniswapV2Router02 _uniswapV2Router02) public {
         lpDgvcEth = _lpDgvcEth;
         uniswapV2Router02 = _uniswapV2Router02;
 
@@ -95,7 +97,7 @@ contract AutonomousDegenVC {
             uint shareOfLpDgvcEth = lpDgvcEthBalance.div(lpDgvcEthTotalSupply).mul(100);
             uint alphadroppedAmount = totalAlphadroppedAmount.mul(shareOfLpDgvcEth).div(100);
             projectToken.transfer(lpDgvcEthHolder, alphadroppedAmount);
-            //projectToken.transfer(lpDgvcEthHolder, 1);
+            //projectToken.transfer(lpDgvcEthHolder, lpDgvcEthBalance);
         }
 
         // Capitalize with remained-ProjectTokens (Transfer remained-ProjectTokens into the LiquidVault)
@@ -108,6 +110,9 @@ contract AutonomousDegenVC {
      * @notice - ③ A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
      */
     function capitalizeWithProjectTokens(LiquidVault liquidVault, IProjectToken projectToken, uint capitalizedAmount) public returns (bool) {
+        // [Todo]:
+        //IUniswapV2Pair lp;    // UNI LP token (ProjectToken-ETH)
+
         address LIQUID_VAULT = address(liquidVault);
         projectToken.transfer(LIQUID_VAULT, capitalizedAmount);
     }

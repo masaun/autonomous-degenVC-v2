@@ -3,6 +3,9 @@ pragma solidity 0.7.4;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
+/**
+ * @notice - This is a mock UNI-V2 LP token (DGVC-ETH pair)
+ */
 contract MockLpToken is ERC20 {
 
     constructor() public ERC20("Uniswap V2 Mock LP Token (DGVC-ETH)", "UNI-V2") {
