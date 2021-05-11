@@ -20,10 +20,10 @@ const IUniswapV2Pair = artifacts.require("IUniswapV2Pair")
 const IUniswapV2Factory = artifacts.require("IUniswapV2Factory")
 
 /// Deployed-addresses
-const UNISWAP_V2_PAIR = "0x7CDc560CC66126a5Eb721e444abC30EB85408f7A"  /// UNI-LP Token (DGVC - ETH pair)
-const UNISWAP_V2_ROUTER_02 = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"
-const UNISWAP_V2_FACTORY = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"
-const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"  /// Wrappered ETH (ERC20)
+const UNISWAP_V2_PAIR = contractAddressList["Mainnet"]["UniswapV2"]["UniswapV2Pair"]["DGVC-ETH"]  /// UNI-LP Token (DGVC - ETH pair)
+const UNISWAP_V2_ROUTER_02 = contractAddressList["Mainnet"]["UniswapV2"]["UniswapV2Router02"]
+const UNISWAP_V2_FACTORY = contractAddressList["Mainnet"]["UniswapV2"]["UniswapV2Factory"]
+const WETH = tokenAddressList["Mainnet"]["WETH"]  /// Wrappered ETH (ERC20)
 
 /**
  * @notice - This is the test of AutonomousDegenVC.sol
