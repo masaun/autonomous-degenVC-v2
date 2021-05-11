@@ -97,7 +97,7 @@ contract("AutonomousDegenVC", function(accounts) {
         })
 
         it("Deploy the AutonomousDegenVC contract instance", async () => {
-            autonomousDegenVC = await AutonomousDegenVC.new(UNISWAP_V2_PAIR, UNISWAP_V2_ROUTER_02, { from: deployer })
+            autonomousDegenVC = await AutonomousDegenVC.new(LP_DGVC_ETH, UNISWAP_V2_ROUTER_02, { from: deployer })
             AUTONOMOUS_DEGEN_VC = autonomousDegenVC.address
         })
 
@@ -113,12 +113,14 @@ contract("AutonomousDegenVC", function(accounts) {
         })
 
         it("[Log]: the UNI-V2 LP Token (DGVC-ETH pair) balance of 3 users", async () => {
+            const _totalSupply = await lpDgvcEth.totalSupply()
             const balance1 = await lpDgvcEth.balanceOf(user1)
             const balance2 = await lpDgvcEth.balanceOf(user2)
             const balance3 = await lpDgvcEth.balanceOf(user3)
-            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair) balance of user1 ===', String(balance1))
-            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair) balance of user2 ===', String(balance2))
-            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair) balance of user3 ===', String(balance3))
+            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): totalSupply ===', String(_totalSupply))
+            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user1 ===', String(balance1))
+            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user2 ===', String(balance2))
+            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user3 ===', String(balance3))
         })
     })
 
@@ -165,7 +167,7 @@ contract("AutonomousDegenVC", function(accounts) {
 
         it("[Step 2]: Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP + [Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
             const totalAlphadroppedAmount = web3.utils.toWei('3', 'ether')  /// 3 TPT
-            const lpHolders = [user1, user2, user3]
+            const lpDgvcEthHolders = [user1, user2, user3]  // [Note]: Assign UNI-LP token holders (= DGVC-ETH pair)
 
             /// Create LP token (ProjecToken-ETH pair) instance
             LP = await uniswapV2Factory.getPair(PROJECT_TOKEN, WETH)
@@ -181,7 +183,11 @@ contract("AutonomousDegenVC", function(accounts) {
             console.log('=== deposited-ProjectToken amount ===', String(depositProjectTokenAmount))
 
             let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, depositProjectTokenAmount, { from: deployer })
-            let txReceipt2 = await autonomousDegenVC.alphadropPartOfProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, depositProjectTokenAmount, lpHolders, { from: deployer })
+            let txReceipt2 = await autonomousDegenVC.alphadropPartOfProjectTokens(LIQUID_VAULT, 
+                                                                                  PROJECT_TOKEN, 
+                                                                                  depositProjectTokenAmount, 
+                                                                                  lpDgvcEthHolders, 
+                                                                                  { from: deployer })
         })
 
         // it("[Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
@@ -209,7 +215,12 @@ contract("AutonomousDegenVC", function(accounts) {
             console.log('=== projectTokenBalance (of UNI-LP Token Holder1) ===', String(projectTokenBalance1))
             console.log('=== projectTokenBalance (of UNI-LP Token Holder2) ===', String(projectTokenBalance2))
             console.log('=== projectTokenBalance (of UNI-LP Token Holder3) ===', String(projectTokenBalance3))
-        })        
+        })  
+
+        it("Remained-ProjectTokens should be transferred into the LiquidVault", async () => {
+            let projectTokenBalance = await projectToken.balanceOf(LIQUID_VAULT)
+            console.log('=== projectTokenBalance (of the LiquidVault) ===', String(projectTokenBalance))
+        })
     })
 
 })
