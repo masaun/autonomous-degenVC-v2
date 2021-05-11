@@ -94,11 +94,10 @@ contract AutonomousDegenVC {
             uint lpDgvcEthTotalSupply = lpDgvcEth.totalSupply();
 
             // Identify share of the LPs
-            // [Note]: In case "uint", below decimal point will be cut. Therefore, it multiple 1e18 and then divide 1e18
+            // [Note]: To avoid round at first decimal point, "1e18" is multiplied (and then it is divided by 1e18)
             uint shareOfLpDgvcEth = lpDgvcEthBalance.mul(1e18).div(lpDgvcEthTotalSupply);
             uint alphadroppedAmount = totalAlphadroppedAmount.mul(shareOfLpDgvcEth).div(1e18);
             projectToken.transfer(lpDgvcEthHolder, alphadroppedAmount);
-            //projectToken.transfer(lpDgvcEthHolder, shareOfLpDgvcEth);      // [Test]
         }
 
         // Capitalize with remained-ProjectTokens (Transfer remained-ProjectTokens into the LiquidVault)
