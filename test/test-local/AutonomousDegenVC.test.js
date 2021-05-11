@@ -215,7 +215,12 @@ contract("AutonomousDegenVC", function(accounts) {
             console.log('=== projectTokenBalance (of UNI-LP Token Holder1) ===', String(projectTokenBalance1))
             console.log('=== projectTokenBalance (of UNI-LP Token Holder2) ===', String(projectTokenBalance2))
             console.log('=== projectTokenBalance (of UNI-LP Token Holder3) ===', String(projectTokenBalance3))
-        })        
+        })  
+
+        it("Remained-ProjectTokens should be transferred into the LiquidVault", async () => {
+            let projectTokenBalance = await projectToken.balanceOf(LIQUID_VAULT)
+            console.log('=== projectTokenBalance (of the LiquidVault) ===', String(projectTokenBalance))
+        })
     })
 
 })
