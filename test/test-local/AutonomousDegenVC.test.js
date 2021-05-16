@@ -117,10 +117,10 @@ contract("AutonomousDegenVC", function(accounts) {
             const balance1 = await lpDgvcEth.balanceOf(user1)
             const balance2 = await lpDgvcEth.balanceOf(user2)
             const balance3 = await lpDgvcEth.balanceOf(user3)
-            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): totalSupply ===', String(_totalSupply))
-            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user1 ===', String(balance1))
-            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user2 ===', String(balance2))
-            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user3 ===', String(balance3))
+            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): totalSupply ===', web3.utils.fromWei(String(_totalSupply), 'ether'))
+            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user1 ===', web3.utils.fromWei(String(balance1), 'ether'))
+            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user2 ===', web3.utils.fromWei(String(balance2), 'ether'))
+            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user3 ===', web3.utils.fromWei(String(balance3), 'ether'))
         })
     })
 
@@ -165,7 +165,11 @@ contract("AutonomousDegenVC", function(accounts) {
             let txReceipt2 = await autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline, { from: deployer, value: ethAmount })
         })
 
-        it("[Step 2]: Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP + [Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
+        it("[Step 2]: Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP \n [Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
+            /// Retrieve alpha dropped-rate (%)
+            let _alphadroppedRate = await autonomousDegenVC.alphadroppedRate()
+            console.log('=== alpha dropped-rate (%) ===', String(_alphadroppedRate))
+
             const totalAlphadroppedAmount = web3.utils.toWei('3', 'ether')  /// 3 TPT
             const lpDgvcEthHolders = [user1, user2, user3]  // [Note]: Assign UNI-LP token holders (= DGVC-ETH pair)
 
@@ -180,7 +184,7 @@ contract("AutonomousDegenVC", function(accounts) {
 
             /// Check totalSupply of ProjectTokens
             const depositProjectTokenAmount = await projectToken.balanceOf(deployer)
-            console.log('=== deposited-ProjectToken amount ===', String(depositProjectTokenAmount))
+            console.log('=== deposited-ProjectToken amount ===', web3.utils.fromWei(String(depositProjectTokenAmount), 'ether'))
 
             let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, depositProjectTokenAmount, { from: deployer })
             let txReceipt2 = await autonomousDegenVC.alphadropPartOfProjectTokens(LIQUID_VAULT, 
@@ -212,14 +216,14 @@ contract("AutonomousDegenVC", function(accounts) {
             let projectTokenBalance2 = await projectToken.balanceOf(lpHolder2)
             let projectTokenBalance3 = await projectToken.balanceOf(lpHolder3)            
 
-            console.log('=== projectTokenBalance (of UNI-LP Token Holder1) ===', String(projectTokenBalance1))
-            console.log('=== projectTokenBalance (of UNI-LP Token Holder2) ===', String(projectTokenBalance2))
-            console.log('=== projectTokenBalance (of UNI-LP Token Holder3) ===', String(projectTokenBalance3))
+            console.log('=== projectTokenBalance (of UNI-LP Token Holder1) ===', web3.utils.fromWei(String(projectTokenBalance1), 'ether'))
+            console.log('=== projectTokenBalance (of UNI-LP Token Holder2) ===', web3.utils.fromWei(String(projectTokenBalance2), 'ether'))
+            console.log('=== projectTokenBalance (of UNI-LP Token Holder3) ===', web3.utils.fromWei(String(projectTokenBalance3), 'ether'))
         })  
 
         it("Remained-ProjectTokens should be transferred into the LiquidVault", async () => {
             let projectTokenBalance = await projectToken.balanceOf(LIQUID_VAULT)
-            console.log('=== projectTokenBalance (of the LiquidVault) ===', String(projectTokenBalance))
+            console.log('=== projectTokenBalance (of the LiquidVault) ===', web3.utils.fromWei(String(projectTokenBalance), 'ether'))
         })
     })
 
