@@ -35,7 +35,7 @@ contract AutonomousDegenVC {
     address UNISWAP_V2_ROUTER_02;
 
     // Define the rate of alphadrop
-    uint alphadroppedRate = 10;   /// 10%
+    uint public alphadroppedRate = 10;   /// 10%
 
     constructor(MockLpToken _lpDgvcEth, IUniswapV2Router02 _uniswapV2Router02) public {
         lpDgvcEth = _lpDgvcEth;
