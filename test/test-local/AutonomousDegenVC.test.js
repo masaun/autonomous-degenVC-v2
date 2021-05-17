@@ -166,10 +166,6 @@ contract("AutonomousDegenVC", function(accounts) {
         })
 
         it("[Step 2]: Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP \n [Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
-            /// Retrieve alpha dropped-rate (%)
-            let _alphadroppedRate = await autonomousDegenVC.alphadroppedRate()
-            console.log('=== alpha dropped-rate (%) ===', String(_alphadroppedRate))
-
             const totalAlphadroppedAmount = web3.utils.toWei('3', 'ether')  /// 3 TPT
             const lpDgvcEthHolders = [user1, user2, user3]  // [Note]: Assign UNI-LP token holders (= DGVC-ETH pair)
 
@@ -192,6 +188,10 @@ contract("AutonomousDegenVC", function(accounts) {
                                                                                   depositProjectTokenAmount, 
                                                                                   lpDgvcEthHolders, 
                                                                                   { from: deployer })
+
+            /// Retrieve alpha dropped-rate (%)
+            let _alphadroppedRate = await autonomousDegenVC.alphadroppedRate()
+            console.log('=== alpha dropped-rate (%) ===', String(_alphadroppedRate))
         })
 
         // it("[Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
