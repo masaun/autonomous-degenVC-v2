@@ -1,6 +1,5 @@
 # Autonomous Degen.VC V2
 
-***
 ## 【Introduction of the Autonomous Degen.VC V2】
 - This is a smart contract that enables a project to launch on Degen VC without our permission. 
   - For example, by calling a public function on a smart contract a project could allocate project tokens to a liquid vault (just an address that needs to be defined), a dev wallet (just an address that needs to be defined), and the DGVC LP.

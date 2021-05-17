@@ -106,7 +106,7 @@ contract("AutonomousDegenVC", function(accounts) {
         })
 
         it("[Log]: Deployer-contract addresses", async () => {
-            console.log('=== LIQUID_VAULT_FACTORY ===', LIQUID_VAULT_FACTORY)
+            console.log('\n=== LIQUID_VAULT_FACTORY ===', LIQUID_VAULT_FACTORY)
             console.log('=== PROJECT_TOKEN_FACTORY ===', PROJECT_TOKEN_FACTORY)
             console.log('=== AUTONOMOUS_DEGEN_VC ===', AUTONOMOUS_DEGEN_VC)
             console.log('=== UNISWAP_V2_FACTORY ===', UNISWAP_V2_FACTORY)
@@ -117,14 +117,14 @@ contract("AutonomousDegenVC", function(accounts) {
             const balance1 = await lpDgvcEth.balanceOf(user1)
             const balance2 = await lpDgvcEth.balanceOf(user2)
             const balance3 = await lpDgvcEth.balanceOf(user3)
-            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): totalSupply ===', web3.utils.fromWei(String(_totalSupply), 'ether'))
+            console.log('\n=== UNI-V2 LP Tokens (DGVC-ETH pair): totalSupply ===', web3.utils.fromWei(String(_totalSupply), 'ether'))
             console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user1 ===', web3.utils.fromWei(String(balance1), 'ether'))
             console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user2 ===', web3.utils.fromWei(String(balance2), 'ether'))
             console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user3 ===', web3.utils.fromWei(String(balance3), 'ether'))
         })
     })
 
-    describe("Workflow of the AutonomousDegenVC contract", () => {
+    describe("\n Workflow of the AutonomousDegenVC contract", () => {
         it("createProjectToken", async () => {
             const name = "Test Project Token"
             const symbol = "TPT"
@@ -134,7 +134,7 @@ contract("AutonomousDegenVC", function(accounts) {
             let event = await getEvents(projectTokenFactory, "ProjectTokenCreated")
             PROJECT_TOKEN = event._projectToken
             projectToken = await ProjectToken.at(PROJECT_TOKEN)
-            console.log('=== PROJECT_TOKEN ===', PROJECT_TOKEN)
+            console.log('\n=== PROJECT_TOKEN ===', PROJECT_TOKEN)
         })
 
         it("createLiquidVault", async () => {
@@ -148,7 +148,7 @@ contract("AutonomousDegenVC", function(accounts) {
 
             let event = await getEvents(liquidVaultFactory, "LiquidVaultCreated")
             LIQUID_VAULT = event._liquidVault
-            console.log('=== LIQUID_VAULT ===', LIQUID_VAULT)
+            console.log('\n=== LIQUID_VAULT ===', LIQUID_VAULT)
         })
 
         it("[Step 1]: A uniswap market is created for the new project", async () => {
@@ -157,7 +157,7 @@ contract("AutonomousDegenVC", function(accounts) {
             const amountETHMin = web3.utils.toWei('0.1', 'ether')      /// 0.1 ETH
             const to = deployer  /// [Note]: your address, because you're the one who gets the fees later
             const deadline = Date.now() + 300   /// Now + 300 seconds
-            console.log('=== deadline ===', deadline)  /// e.g). 1620193601002
+            console.log('\n=== deadline ===', deadline)  /// e.g). 1620193601002
 
             const ethAmount = amountETHMin   /// Because it's the first time we add liquidity
 
@@ -165,14 +165,14 @@ contract("AutonomousDegenVC", function(accounts) {
             let txReceipt2 = await autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline, { from: deployer, value: ethAmount })
         })
 
-        it("[Step 2]: Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP \n [Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
+        it("[Step 2]: Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP \n + [Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
             const totalAlphadroppedAmount = web3.utils.toWei('3', 'ether')  /// 3 TPT
             const lpDgvcEthHolders = [user1, user2, user3]  // [Note]: Assign UNI-LP token holders (= DGVC-ETH pair)
 
             /// Create LP token (ProjecToken-ETH pair) instance
             LP = await uniswapV2Factory.getPair(PROJECT_TOKEN, WETH)
             lp = await IUniswapV2Pair.at(LP)
-            console.log('=== UNI-LP token (ProjecToken-ETH pair) address ===', LP)
+            console.log('\n=== UNI-LP token (ProjecToken-ETH pair) address ===', LP)
 
             /// Check totalSupply of LPs (ProjecToken-ETH pair)
             //const totalSupplyOfLp = await lp.totalSupply()
@@ -206,7 +206,7 @@ contract("AutonomousDegenVC", function(accounts) {
         // })
     })
 
-    describe("Check final result", () => {
+    describe("\n Check final result", () => {
         it("ProjectTokens should be distributed into all UNI-LP token (DGVC-ETH) holders", async () => {
             const lpHolder1 = user1
             const lpHolder2 = user2
@@ -216,14 +216,14 @@ contract("AutonomousDegenVC", function(accounts) {
             let projectTokenBalance2 = await projectToken.balanceOf(lpHolder2)
             let projectTokenBalance3 = await projectToken.balanceOf(lpHolder3)            
 
-            console.log('=== projectTokenBalance (of UNI-LP Token Holder1) ===', web3.utils.fromWei(String(projectTokenBalance1), 'ether'))
+            console.log('\n=== projectTokenBalance (of UNI-LP Token Holder1) ===', web3.utils.fromWei(String(projectTokenBalance1), 'ether'))
             console.log('=== projectTokenBalance (of UNI-LP Token Holder2) ===', web3.utils.fromWei(String(projectTokenBalance2), 'ether'))
             console.log('=== projectTokenBalance (of UNI-LP Token Holder3) ===', web3.utils.fromWei(String(projectTokenBalance3), 'ether'))
         })  
 
         it("Remained-ProjectTokens should be transferred into the LiquidVault", async () => {
             let projectTokenBalance = await projectToken.balanceOf(LIQUID_VAULT)
-            console.log('=== projectTokenBalance (of the LiquidVault) ===', web3.utils.fromWei(String(projectTokenBalance), 'ether'))
+            console.log('\n=== projectTokenBalance (of the LiquidVault) ===', web3.utils.fromWei(String(projectTokenBalance), 'ether'))
         })
     })
 
