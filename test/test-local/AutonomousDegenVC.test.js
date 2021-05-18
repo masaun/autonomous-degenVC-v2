@@ -125,7 +125,7 @@ contract("AutonomousDegenVC", function(accounts) {
     })
 
     describe("\n Workflow of the AutonomousDegenVC contract", () => {
-        it("[Step 1]: Create ProjectToken", async () => {
+        it("[Step 1]: Create a ProjectToken", async () => {
             const name = "Test Project Token"
             const symbol = "TPT"
             const initialSupply = web3.utils.toWei("100000000", "ether") 
