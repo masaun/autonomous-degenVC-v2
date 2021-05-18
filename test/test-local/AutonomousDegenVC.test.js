@@ -125,7 +125,7 @@ contract("AutonomousDegenVC", function(accounts) {
     })
 
     describe("\n Workflow of the AutonomousDegenVC contract", () => {
-        it("createProjectToken", async () => {
+        it("[Step 1]: Create ProjectToken", async () => {
             const name = "Test Project Token"
             const symbol = "TPT"
             const initialSupply = web3.utils.toWei("100000000", "ether") 
@@ -137,7 +137,7 @@ contract("AutonomousDegenVC", function(accounts) {
             console.log('\n=== PROJECT_TOKEN ===', PROJECT_TOKEN)
         })
 
-        it("createLiquidVault", async () => {
+        it("[Step 2]: Create a Liquid Vault", async () => {
             /// [Todo]: Replace assigned-value with exact value
             const duration = 0
             const feeDistributor = deployer
@@ -151,7 +151,7 @@ contract("AutonomousDegenVC", function(accounts) {
             console.log('\n=== LIQUID_VAULT ===', LIQUID_VAULT)
         })
 
-        it("[Step 1]: A uniswap market is created for the new project", async () => {
+        it("[Step 3]: A uniswap market is created for the new project", async () => {
             const amountTokenDesired = web3.utils.toWei('5', 'ether')  /// 5 TPT
             const amountTokenMin = web3.utils.toWei('5', 'ether')      /// [Note]: Equal to amountTokenDesired because it's the first time we add liquidity
             const amountETHMin = web3.utils.toWei('0.1', 'ether')      /// 0.1 ETH
@@ -165,7 +165,7 @@ contract("AutonomousDegenVC", function(accounts) {
             let txReceipt2 = await autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline, { from: deployer, value: ethAmount })
         })
 
-        it("[Step 2]: Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP \n + [Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
+        it("[Step 4]: Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP \n + [Step 5]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
             const totalAlphadroppedAmount = web3.utils.toWei('3', 'ether')  /// 3 TPT
             const lpDgvcEthHolders = [user1, user2, user3]  // [Note]: Assign UNI-LP token holders (= DGVC-ETH pair)
 
