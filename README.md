@@ -11,7 +11,7 @@
 ***
 
 ## 【Workflow】
-- Launches projects with 5 steps:
+- Launch a project on Degen.VC with 5 steps:
   - ① Create a project token
   - ② Create a Liquid Vault
   - ③ A uniswap market is created for the new project.
@@ -21,6 +21,7 @@
 <br>
 
 - Diagram of workflow  
+![【Diagram】Autonomous Degen VC v2](https://user-images.githubusercontent.com/19357502/118577354-39bc1580-b7c5-11eb-9fb8-94bc503f5891.jpg)
 
 &nbsp;
 
@@ -68,14 +69,6 @@ $ ganache-cli -d --fork https://mainnet.infura.io/v3/{YOUR INFURA KEY}@{BLOCK_NU
   - Test for the contract
     `$ npm run test:AutonomousDegenVC`
     ($ truffle test ./test/test-local/AutonomousDegenVC.test.js)
-
-<br>
-
-***
-
-## 【Demo】
-- Video demo that execute test
-
 
 <br>
 
