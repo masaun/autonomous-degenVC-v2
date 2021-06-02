@@ -97,7 +97,7 @@ contract("AutonomousDegenVC", function(accounts) {
         })
 
         it("Deploy the AutonomousDegenVC contract instance", async () => {
-            autonomousDegenVC = await AutonomousDegenVC.new(LP_DGVC_ETH, UNISWAP_V2_ROUTER_02, { from: deployer })
+            autonomousDegenVC = await AutonomousDegenVC.new(LP_DGVC_ETH, UNISWAP_V2_ROUTER_02, UNISWAP_V2_FACTORY, WETH, { from: deployer })
             AUTONOMOUS_DEGEN_VC = autonomousDegenVC.address
         })
 
