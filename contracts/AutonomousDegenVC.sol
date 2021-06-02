@@ -133,12 +133,19 @@ contract AutonomousDegenVC {
         // [Todo]: Check whether msg.sender is early user or not
         address earlyUser = msg.sender;
 
-        // [Todo]: Transfer LPs (ProjectToken - ETH pair) into early users
         address PROJECT_TOKEN = address(projectToken);
-        address pair = uniswapV2Factory.getPair(PROJECT_TOKEN, WETH);
-        IUniswapV2Pair lpProjectTokenEth = IUniswapV2Pair(pair);
+        address PAIR = uniswapV2Factory.getPair(PROJECT_TOKEN, WETH);
+        IUniswapV2Pair lpProjectTokenEth = IUniswapV2Pair(PAIR);
 
-        uint amount;  // [Todo]: Identify transferred-amount for a early user
+        uint totalSupplyOfLpProjectTokenEth = lpProjectTokenEth.totalSupply();
+
+        // [Todo]: Check share of LPs (ProjectToken - ETH pair) of a early user who call this method
+        uint share;
+
+        // [Todo]: Identify how much amount is transferred into a early user
+        uint amount = totalSupplyOfLpProjectTokenEth.mul(share).div(100);
+
+        // [Todo]: Transfer LPs (ProjectToken - ETH pair) into early users
         lpProjectTokenEth.transfer(earlyUser, amount);
     }
 

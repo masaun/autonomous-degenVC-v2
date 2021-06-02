@@ -6,7 +6,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "truffle test ./test/test-local/*",
+    "test": "truffle test ./test/test-local/* --network local",
     "test:AutonomousDegenVC": "truffle test ./test/test-local/AutonomousDegenVC.test.js --network local",
     "compile:local": "truffle compile --reset --network local",
     "migrate:local": "truffle migrate --reset --network local",
