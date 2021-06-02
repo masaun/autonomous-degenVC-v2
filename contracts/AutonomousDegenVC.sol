@@ -107,6 +107,13 @@ contract AutonomousDegenVC {
     }
 
     /**
+     * @notice - Claim LP for early users.
+     */
+    function claimEarlyLP() public {
+        /// [Todo]: 
+    }
+
+    /**
      * @notice - ③ A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
      */
     function capitalizeWithProjectTokens(LiquidVault liquidVault, IProjectToken projectToken, uint capitalizedAmount) public returns (bool) {

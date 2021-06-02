@@ -27,7 +27,7 @@ const WETH = tokenAddressList["Mainnet"]["WETH"]  /// Wrappered ETH (ERC20)
 
 /**
  * @notice - This is the test of AutonomousDegenVC.sol
- * @notice - [Execution command]: $ truffle test ./test/test-local/AutonomousDegenVC.test.js
+ * @notice - [Execution command]: $ truffle test ./test/test-local/AutonomousDegenVC.test.js --network local
  */
 contract("AutonomousDegenVC", function(accounts) {
     /// Acccounts
