@@ -129,7 +129,11 @@ contract AutonomousDegenVC {
     /**
      * @notice - ④ Claim LP for early users.
      */
-    function claimEarlyLP(IProjectToken projectToken) public {
+    function claimEarlyLP(LiquidVault liquidVault, IProjectToken projectToken) public {
+        // [Todo]: Claim LPs (ProjectToken-ETH pair) in the LiquidVault
+        address LIQUID_VAULT = address(liquidVault);
+        liquidVault.claimLP(); 
+
         // [Todo]: Check whether msg.sender is early user or not
         address earlyUser = msg.sender;
 
@@ -142,7 +146,7 @@ contract AutonomousDegenVC {
         // [Todo]: Check share of LPs (ProjectToken - ETH pair) of a early user who call this method
         uint share;
 
-        // [Todo]: Identify how much amount is transferred into a early user
+        // [Todo]: Based on share, how much amount should be transferred into a early user is identified
         uint amount = totalSupplyOfLpProjectTokenEth.mul(share).div(100);
 
         // [Todo]: Transfer LPs (ProjectToken - ETH pair) into early users
