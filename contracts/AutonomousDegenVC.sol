@@ -132,6 +132,7 @@ contract AutonomousDegenVC {
     function claimEarlyLP(LiquidVault liquidVault, IProjectToken projectToken) public {
         // [Todo]: Claim LPs (ProjectToken-ETH pair) in the LiquidVault
         address LIQUID_VAULT = address(liquidVault);
+        liquidVault.purchaseLP();  // [Note]: Is this purchase LP method needed?
         liquidVault.claimLP(); 
 
         // [Todo]: Check whether msg.sender is early user or not
