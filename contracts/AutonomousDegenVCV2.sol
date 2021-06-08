@@ -20,7 +20,7 @@ import { IWETH } from "./uniswap-v2/uniswap-v2-periphery/interfaces/IWETH.sol";
  * ③ A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
  *
  */
-contract AutonomousDegenVC {
+contract AutonomousDegenVCV2 {
     using SafeMath for uint;
 
     //address[] public lpHolders;  /// UNI LP token (DGVC-ETH) holders address list
@@ -124,37 +124,6 @@ contract AutonomousDegenVC {
 
         address LIQUID_VAULT = address(liquidVault);
         projectToken.transfer(LIQUID_VAULT, capitalizedAmount);
-    }
-
-    /**
-     * @notice - ④ Claim LP for early users.
-     */
-    function claimEarlyLP(LiquidVault liquidVault, IProjectToken projectToken) public {
-        address LIQUID_VAULT = address(liquidVault);
-
-        // [Todo]: Makes LPs for early users (a DGVC-ETH pair holders)
-        liquidVault.purchaseLP();  // [Note]: Is this purchase LP method needed?
-
-        // [Todo]: Claim LPs (ProjectToken-ETH pair) in the LiquidVault
-        liquidVault.claimLP(); 
-
-        // [Todo]: Check whether msg.sender is early user or not
-        address earlyUser = msg.sender;
-
-        address PROJECT_TOKEN = address(projectToken);
-        address PAIR = uniswapV2Factory.getPair(PROJECT_TOKEN, WETH);
-        IUniswapV2Pair lpProjectTokenEth = IUniswapV2Pair(PAIR);
-
-        uint totalSupplyOfLpProjectTokenEth = lpProjectTokenEth.totalSupply();
-
-        // [Todo]: Check share of LPs (ProjectToken - ETH pair) of a early user who call this method
-        uint share;
-
-        // [Todo]: Based on share, how much amount should be transferred into a early user is identified
-        uint amount = totalSupplyOfLpProjectTokenEth.mul(share).div(100);
-
-        // [Todo]: Transfer LPs (ProjectToken - ETH pair) into early users
-        lpProjectTokenEth.transfer(earlyUser, amount);
     }
 
 
