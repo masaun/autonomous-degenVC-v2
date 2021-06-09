@@ -82,17 +82,10 @@ contract AutonomousDegenVCV2 {
      *             (A Liquid Vault is topped up with project tokens)
      */
     function capitalizeWithProjectTokens(LiquidVault liquidVault, IProjectToken projectToken, uint capitalizedAmount) public payable returns (bool) {
-        // [Todo]:
-        //IUniswapV2Pair lp;    // UNI LP token (ProjectToken-ETH)
-
-        address LIQUID_VAULT = address(liquidVault);
-
-        // [Todo]: Send ETH from msg.sender
-        // [Todo]: Swap ETH sent for LPs. (Then, LPs swapped will be locked in the LiquidVault)
+        // @notice - Send ETH from msg.sender
+        // @notice - Swap ETH sent for LPs. (Then, LPs swapped will be locked in the LiquidVault)
         liquidVault.purchaseLP{ value: msg.value }();
         //_purchaseLP{ value: msg.value }(liquidVault);
-
-        projectToken.transfer(LIQUID_VAULT, capitalizedAmount);
     }
 
     /**
@@ -108,27 +101,8 @@ contract AutonomousDegenVCV2 {
         bool claimed;
         (holder, amount, timestamp, claimed) = _getLockedLP(liquidVault, msg.sender, position);
 
-
         // Claim LPs (ProjectToken-ETH pair) in the LiquidVault
-        _claimLP(liquidVault); 
-
-        // [Todo]: Check whether msg.sender is early user or not
-        address earlyUser = msg.sender;
-
-        address PROJECT_TOKEN = address(projectToken);
-        address PAIR = uniswapV2Factory.getPair(PROJECT_TOKEN, WETH);
-        IUniswapV2Pair lpProjectTokenEth = IUniswapV2Pair(PAIR);
-
-        uint totalSupplyOfLpProjectTokenEth = lpProjectTokenEth.totalSupply();
-
-        // [Todo]: Check share of LPs (ProjectToken - ETH pair) of a early user who call this method
-        uint share;
-
-        // [Todo]: Based on share, how much amount should be transferred into a early user is identified
-        uint projectTokenAmount = totalSupplyOfLpProjectTokenEth.mul(share).div(100);
-
-        // [Todo]: Transfer LPs (ProjectToken - ETH pair) into early users
-        lpProjectTokenEth.transfer(earlyUser, projectTokenAmount);
+        _claimLP(liquidVault);
     }
 
 
