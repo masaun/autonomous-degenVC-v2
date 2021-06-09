@@ -95,6 +95,14 @@ contract AutonomousDegenVCV2 {
     function claimEarlyLP(LiquidVault liquidVault, IProjectToken projectToken) public {
         address LIQUID_VAULT = address(liquidVault);
 
+        // [Todo]: Check locked-period of msg.sender
+        address holder;
+        uint amount;
+        uint timestamp;
+        bool claimed;
+        (holder, amount, timestamp, claimed) = _getLockedLP(liquidVault, holder, position);
+
+
         // Claim LPs (ProjectToken-ETH pair) in the LiquidVault
         _claimLP(liquidVault); 
 
