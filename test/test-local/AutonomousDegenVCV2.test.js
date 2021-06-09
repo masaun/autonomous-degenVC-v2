@@ -10,7 +10,7 @@ const contractAddressList = require("../../migrations/addressesList/contractAddr
 const tokenAddressList = require("../../migrations/addressesList/tokenAddress/tokenAddress.js")
 
 /// Artifact of smart contracts 
-const AutonomousDegenVC = artifacts.require("AutonomousDegenVC")
+const AutonomousDegenVCV2 = artifacts.require("AutonomousDegenVCV2")
 const LiquidVaultFactory = artifacts.require("LiquidVaultFactory")
 const ProjectTokenFactory = artifacts.require("ProjectTokenFactory")
 const LiquidVault = artifacts.require("LiquidVault")
@@ -26,10 +26,10 @@ const UNISWAP_V2_FACTORY = contractAddressList["Mainnet"]["UniswapV2"]["UniswapV
 const WETH = tokenAddressList["Mainnet"]["WETH"]  /// Wrappered ETH (ERC20)
 
 /**
- * @notice - This is the test of AutonomousDegenVC.sol
- * @notice - [Execution command]: $ truffle test ./test/test-local/AutonomousDegenVC.test.js --network local
+ * @notice - This is the test of AutonomousDegenVCV2.sol
+ * @notice - [Execution command]: $ truffle test ./test/test-local/AutonomousDegenVCV2.test.js --network local
  */
-contract("AutonomousDegenVC", function(accounts) {
+contract("AutonomousDegenVCV2", function(accounts) {
     /// Acccounts
     let deployer = accounts[0]
     let user1 = accounts[1]
@@ -96,8 +96,8 @@ contract("AutonomousDegenVC", function(accounts) {
             PROJECT_TOKEN_FACTORY = projectTokenFactory.address
         })
 
-        it("Deploy the AutonomousDegenVC contract instance", async () => {
-            autonomousDegenVC = await AutonomousDegenVC.new(LP_DGVC_ETH, UNISWAP_V2_ROUTER_02, UNISWAP_V2_FACTORY, WETH, { from: deployer })
+        it("Deploy the AutonomousDegenVC (V2) contract instance", async () => {
+            autonomousDegenVC = await AutonomousDegenVCV2.new(LP_DGVC_ETH, UNISWAP_V2_ROUTER_02, UNISWAP_V2_FACTORY, WETH, { from: deployer })
             AUTONOMOUS_DEGEN_VC = autonomousDegenVC.address
         })
 

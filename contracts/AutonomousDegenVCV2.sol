@@ -20,7 +20,7 @@ import { IWETH } from "./uniswap-v2/uniswap-v2-periphery/interfaces/IWETH.sol";
  * ③ A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
  *
  */
-contract AutonomousDegenVC {
+contract AutonomousDegenVCV2 {
     using SafeMath for uint;
 
     //address[] public lpHolders;  /// UNI LP token (DGVC-ETH) holders address list
@@ -78,45 +78,7 @@ contract AutonomousDegenVC {
     }
 
     /**
-     * @notice - Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP;
-     */    
-    function alphadropPartOfProjectTokens(
-        LiquidVault liquidVault,
-        IProjectToken projectToken, 
-        uint depositProjectTokenAmount,
-        //uint totalAlphadroppedAmount, 
-        address[] memory lpDgvcEthHolders  // [Note]: Assign UNI-LP token holders (= DGVC-ETH pair) from front-end
-    ) public returns (bool) {
-        // Deposit ProjectTokens into this contract
-        projectToken.transferFrom(msg.sender, address(this), depositProjectTokenAmount);
-
-        // TotalSupply of ProjectTokens
-        uint totalSupplyOfProjectToken = projectToken.totalSupply();
-
-        // Calculate total alphadropped-amount of the ProjectTokens
-        uint totalAlphadroppedAmount = totalSupplyOfProjectToken.mul(alphadroppedRate).div(100);
-
-        // The ProjectTokens are alphadropped into each UNI-LP token holders
-        for (uint i=0; i < lpDgvcEthHolders.length; i++) {
-            address lpDgvcEthHolder = lpDgvcEthHolders[i];
-            uint lpDgvcEthBalance = lpDgvcEth.balanceOf(lpDgvcEthHolder);
-            uint lpDgvcEthTotalSupply = lpDgvcEth.totalSupply();
-
-            // Identify share of the LPs
-            // [Note]: To avoid round at first decimal point, "1e18" is multiplied (and then it is divided by 1e18)
-            uint shareOfLpDgvcEth = lpDgvcEthBalance.mul(1e18).div(lpDgvcEthTotalSupply);
-            uint alphadroppedAmount = totalAlphadroppedAmount.mul(shareOfLpDgvcEth).div(1e18);
-            projectToken.transfer(lpDgvcEthHolder, alphadroppedAmount);
-        }
-
-        // Capitalize with remained-ProjectTokens (Transfer remained-ProjectTokens into the LiquidVault)
-        uint capitalizedAmount = projectToken.balanceOf(address(this));
-        //uint capitalizedAmount = depositProjectTokenAmount.sub(totalAlphadroppedAmount);
-        capitalizeWithProjectTokens(liquidVault, projectToken, capitalizedAmount);
-    }
-
-    /**
-     * @notice - ③ A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
+     * @notice - ② A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
      */
     function capitalizeWithProjectTokens(LiquidVault liquidVault, IProjectToken projectToken, uint capitalizedAmount) public returns (bool) {
         // [Todo]:
@@ -127,7 +89,7 @@ contract AutonomousDegenVC {
     }
 
     /**
-     * @notice - ④ Claim LP for early users.
+     * @notice - ③ Claim LP for early users.
      */
     function claimEarlyLP(LiquidVault liquidVault, IProjectToken projectToken) public {
         address LIQUID_VAULT = address(liquidVault);
@@ -158,9 +120,25 @@ contract AutonomousDegenVC {
     }
 
 
-    ///----------------
-    /// Getter methods
-    ///----------------
+    //----------------------------------------------
+    // Inherited-methods from the LiquidVault.sol
+    //----------------------------------------------
+
+    // @notice - Claim LPs (ProjectToken-ETH pair) in the LiquidVault
+    function _claimLP(LiquidVault liquidVault) internal returns (bool) {
+        liquidVault.claimLP(); 
+    }
+
+    // @notice - Makes LPs for early users (a DGVC-ETH pair holders)
+    function _purchaseLP(LiquidVault liquidVault) internal returns (bool) {
+        liquidVault.purchaseLP();
+    }
+
+
+
+    //----------------
+    // Getter methods
+    //----------------
     /**
      * @notice - [Todo]: Identify UNI-LP token holders (= DGVC-ETH pair)
      */

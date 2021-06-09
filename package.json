@@ -6,11 +6,11 @@
     "test": "test"
   },
   "scripts": {
-    "test": "truffle test ./test/test-local/*",
-    "test:AutonomousDegenVC": "truffle test ./test/test-local/AutonomousDegenVC.test.js",
+    "test": "truffle test ./test/test-local/* --network local",
+    "test:AutonomousDegenVC": "truffle test ./test/test-local/AutonomousDegenVC.test.js --network local",
+    "test:AutonomousDegenVCV2": "truffle test ./test/test-local/AutonomousDegenVCV2.test.js --network local",
     "compile:local": "truffle compile --reset --network local",
-    "migrate:local": "truffle migrate --reset --network local",
-    "start-blank": "rm -rf client/src && cp -rf barebones/src client/"
+    "migrate:local": "truffle migrate --reset --network local"
   },
   "author": "masaun",
   "license": "MIT",

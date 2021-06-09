@@ -70,6 +70,9 @@ $ ganache-cli -d --fork https://mainnet.infura.io/v3/{YOUR INFURA KEY}@{BLOCK_NU
     `$ npm run test:AutonomousDegenVC`
     ($ truffle test ./test/test-local/AutonomousDegenVC.test.js)
 
+    `$ npm run test:AutonomousDegenVCV2`
+    ($ truffle test ./test/test-local/AutonomousDegenVCV2.test.js)
+
 <br>
 
 ***
