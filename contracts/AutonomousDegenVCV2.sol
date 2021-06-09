@@ -120,11 +120,25 @@ contract AutonomousDegenVCV2 {
     }
 
 
+    //----------------------------------------------
+    // Inherited-methods from the LiquidVault.sol
+    //----------------------------------------------
+
+    // @notice - Claim LPs (ProjectToken-ETH pair) in the LiquidVault
+    function _claimLP(LiquidVault liquidVault) internal returns (bool) {
+        liquidVault.claimLP(); 
+    }
+
+    // @notice - Makes LPs for early users (a DGVC-ETH pair holders)
+    function _purchaseLP(LiquidVault liquidVault) internal returns (bool) {
+        liquidVault.purchaseLP();
+    }
 
 
-    ///----------------
-    /// Getter methods
-    ///----------------
+
+    //----------------
+    // Getter methods
+    //----------------
     /**
      * @notice - [Todo]: Identify UNI-LP token holders (= DGVC-ETH pair)
      */
