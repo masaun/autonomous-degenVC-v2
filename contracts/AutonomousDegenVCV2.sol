@@ -40,7 +40,7 @@ contract AutonomousDegenVCV2 {
     address WETH;
 
     // Define the rate of alphadrop
-    uint public alphadroppedRate = 10;   /// 10%
+    //uint public alphadroppedRate = 10;   /// 10%
 
     constructor(MockLpToken _lpDgvcEth, IUniswapV2Router02 _uniswapV2Router02, IUniswapV2Factory _uniswapV2Factory, IWETH _wETH) public {
         lpDgvcEth = _lpDgvcEth;
@@ -79,6 +79,7 @@ contract AutonomousDegenVCV2 {
 
     /**
      * @notice - ② A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
+     *             (Project tokens are topped up the vault)
      */
     function capitalizeWithProjectTokens(LiquidVault liquidVault, IProjectToken projectToken, uint capitalizedAmount) public returns (bool) {
         // [Todo]:
@@ -94,11 +95,8 @@ contract AutonomousDegenVCV2 {
     function claimEarlyLP(LiquidVault liquidVault, IProjectToken projectToken) public {
         address LIQUID_VAULT = address(liquidVault);
 
-        // [Todo]: Makes LPs for early users (a DGVC-ETH pair holders)
-        liquidVault.purchaseLP();  // [Note]: Is this purchase LP method needed?
-
-        // [Todo]: Claim LPs (ProjectToken-ETH pair) in the LiquidVault
-        liquidVault.claimLP(); 
+        // Claim LPs (ProjectToken-ETH pair) in the LiquidVault
+        _claimLP(liquidVault); 
 
         // [Todo]: Check whether msg.sender is early user or not
         address earlyUser = msg.sender;
@@ -134,6 +132,10 @@ contract AutonomousDegenVCV2 {
         liquidVault.purchaseLP();
     }
 
+    // @notice - Get a locked-LP 
+    function _getLockedLP(LiquidVault liquidVault, address holder, uint position) internal view returns (address, uint, uint, bool) {
+        liquidVault.getLockedLP(holder, position);
+    }
 
 
     //----------------
