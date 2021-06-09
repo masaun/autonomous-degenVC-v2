@@ -79,7 +79,7 @@ contract AutonomousDegenVCV2 {
 
     /**
      * @notice - ② A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
-     *             (Project tokens are topped up the vault)
+     *             (A Liquid Vault is topped up with project tokens)
      */
     function capitalizeWithProjectTokens(LiquidVault liquidVault, IProjectToken projectToken, uint capitalizedAmount) public returns (bool) {
         // [Todo]:
@@ -92,15 +92,15 @@ contract AutonomousDegenVCV2 {
     /**
      * @notice - ③ Claim LP for early users.
      */
-    function claimEarlyLP(LiquidVault liquidVault, IProjectToken projectToken) public {
+    function claimEarlyLP(LiquidVault liquidVault, IProjectToken projectToken, uint position) public {
         address LIQUID_VAULT = address(liquidVault);
 
-        // [Todo]: Check locked-period of msg.sender
+        // Check locked-period of msg.sender
         address holder;
         uint amount;
         uint timestamp;
         bool claimed;
-        (holder, amount, timestamp, claimed) = _getLockedLP(liquidVault, holder, position);
+        (holder, amount, timestamp, claimed) = _getLockedLP(liquidVault, msg.sender, position);
 
 
         // Claim LPs (ProjectToken-ETH pair) in the LiquidVault
@@ -119,10 +119,10 @@ contract AutonomousDegenVCV2 {
         uint share;
 
         // [Todo]: Based on share, how much amount should be transferred into a early user is identified
-        uint amount = totalSupplyOfLpProjectTokenEth.mul(share).div(100);
+        uint projectTokenAmount = totalSupplyOfLpProjectTokenEth.mul(share).div(100);
 
         // [Todo]: Transfer LPs (ProjectToken - ETH pair) into early users
-        lpProjectTokenEth.transfer(earlyUser, amount);
+        lpProjectTokenEth.transfer(earlyUser, projectTokenAmount);
     }
 
 
@@ -135,13 +135,13 @@ contract AutonomousDegenVCV2 {
         liquidVault.claimLP(); 
     }
 
-    // @notice - Makes LPs for early users (a DGVC-ETH pair holders)
+    // @notice - Send ETH to match with the ProjectTokens in LiquidVault
     function _purchaseLP(LiquidVault liquidVault) internal returns (bool) {
-        liquidVault.purchaseLP();
+        liquidVault.purchaseLP{ value: msg.value }();
     }
 
     // @notice - Get a locked-LP 
-    function _getLockedLP(LiquidVault liquidVault, address holder, uint position) 
+    function _getLockedLP(LiquidVault liquidVault, address holder_, uint position) 
         internal 
         view 
         returns (address _holder, uint _amount, uint _timestamp, bool _claimed) 
@@ -150,7 +150,7 @@ contract AutonomousDegenVCV2 {
         uint amount;
         uint timestamp;
         bool claimed;
-        (holder, amount, timestamp, claimed) = liquidVault.getLockedLP(holder, position);
+        (holder, amount, timestamp, claimed) = liquidVault.getLockedLP(holder_, position);
 
         return (holder, amount, timestamp, claimed);
     }
