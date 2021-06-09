@@ -26,10 +26,10 @@ const UNISWAP_V2_FACTORY = contractAddressList["Mainnet"]["UniswapV2"]["UniswapV
 const WETH = tokenAddressList["Mainnet"]["WETH"]  /// Wrappered ETH (ERC20)
 
 /**
- * @notice - This is the test of AutonomousDegenVC.sol
- * @notice - [Execution command]: $ truffle test ./test/test-local/AutonomousDegenVC.test.js --network local
+ * @notice - This is the test of AutonomousDegenVCV2.sol
+ * @notice - [Execution command]: $ truffle test ./test/test-local/AutonomousDegenVCV2.test.js --network local
  */
-contract("AutonomousDegenVC", function(accounts) {
+contract("AutonomousDegenVCV2", function(accounts) {
     /// Acccounts
     let deployer = accounts[0]
     let user1 = accounts[1]
