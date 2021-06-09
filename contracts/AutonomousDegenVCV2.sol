@@ -133,8 +133,18 @@ contract AutonomousDegenVCV2 {
     }
 
     // @notice - Get a locked-LP 
-    function _getLockedLP(LiquidVault liquidVault, address holder, uint position) internal view returns (address, uint, uint, bool) {
-        liquidVault.getLockedLP(holder, position);
+    function _getLockedLP(LiquidVault liquidVault, address holder, uint position) 
+        internal 
+        view 
+        returns (address _holder, uint _amount, uint _timestamp, bool _claimed) 
+    {
+        address holder;
+        uint amount;
+        uint timestamp;
+        bool claimed;
+        (holder, amount, timestamp, claimed) = liquidVault.getLockedLP(holder, position);
+
+        return (holder, amount, timestamp, claimed);
     }
 
 
