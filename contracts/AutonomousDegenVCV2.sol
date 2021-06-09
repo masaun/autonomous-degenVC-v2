@@ -93,14 +93,6 @@ contract AutonomousDegenVCV2 {
      */
     function claimEarlyLP(LiquidVault liquidVault, IProjectToken projectToken, uint position) public {
         address LIQUID_VAULT = address(liquidVault);
-
-        // Check locked-period of msg.sender
-        address holder;
-        uint amount;
-        uint timestamp;
-        bool claimed;
-        (holder, amount, timestamp, claimed) = _getLockedLP(liquidVault, msg.sender, position);
-
         // Claim LPs (ProjectToken-ETH pair) in the LiquidVault
         _claimLP(liquidVault);
     }
@@ -121,8 +113,8 @@ contract AutonomousDegenVCV2 {
     }
 
     // @notice - Get a locked-LP 
-    function _getLockedLP(LiquidVault liquidVault, address holder_, uint position) 
-        internal 
+    function getLockedLP(LiquidVault liquidVault, address holder_, uint position) 
+        public
         view 
         returns (address _holder, uint _amount, uint _timestamp, bool _claimed) 
     {
