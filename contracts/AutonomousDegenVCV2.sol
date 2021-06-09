@@ -81,11 +81,17 @@ contract AutonomousDegenVCV2 {
      * @notice - ② A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
      *             (A Liquid Vault is topped up with project tokens)
      */
-    function capitalizeWithProjectTokens(LiquidVault liquidVault, IProjectToken projectToken, uint capitalizedAmount) public returns (bool) {
+    function capitalizeWithProjectTokens(LiquidVault liquidVault, IProjectToken projectToken, uint capitalizedAmount) public payable returns (bool) {
         // [Todo]:
         //IUniswapV2Pair lp;    // UNI LP token (ProjectToken-ETH)
 
         address LIQUID_VAULT = address(liquidVault);
+
+        // [Todo]: Send ETH from msg.sender
+        // [Todo]: Swap ETH sent for LPs. (Then, LPs swapped will be locked in the LiquidVault)
+        liquidVault.purchaseLP{ value: msg.value }();
+        //_purchaseLP{ value: msg.value }(liquidVault);
+
         projectToken.transfer(LIQUID_VAULT, capitalizedAmount);
     }
 
