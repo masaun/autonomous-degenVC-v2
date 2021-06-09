@@ -40,7 +40,7 @@ contract AutonomousDegenVCV2 {
     address WETH;
 
     // Define the rate of alphadrop
-    uint public alphadroppedRate = 10;   /// 10%
+    //uint public alphadroppedRate = 10;   /// 10%
 
     constructor(MockLpToken _lpDgvcEth, IUniswapV2Router02 _uniswapV2Router02, IUniswapV2Factory _uniswapV2Factory, IWETH _wETH) public {
         lpDgvcEth = _lpDgvcEth;
@@ -79,44 +79,30 @@ contract AutonomousDegenVCV2 {
 
     /**
      * @notice - ② A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
+     *             (A Liquid Vault is topped up with project tokens)
      */
-    function capitalizeWithProjectTokens(LiquidVault liquidVault, IProjectToken projectToken, uint capitalizedAmount) public returns (bool) {
-        // [Todo]:
-        //IUniswapV2Pair lp;    // UNI LP token (ProjectToken-ETH)
-
-        address LIQUID_VAULT = address(liquidVault);
-        projectToken.transfer(LIQUID_VAULT, capitalizedAmount);
+    function capitalizeWithProjectTokens(LiquidVault liquidVault, IProjectToken projectToken, uint capitalizedAmount) public payable returns (bool) {
+        // @notice - Send ETH from msg.sender
+        // @notice - Swap ETH sent for LPs. (Then, LPs swapped will be locked in the LiquidVault)
+        liquidVault.purchaseLP{ value: msg.value }();
+        //_purchaseLP{ value: msg.value }(liquidVault);
     }
 
     /**
      * @notice - ③ Claim LP for early users.
      */
-    function claimEarlyLP(LiquidVault liquidVault, IProjectToken projectToken) public {
+    function claimEarlyLP(LiquidVault liquidVault, IProjectToken projectToken, uint position) public {
         address LIQUID_VAULT = address(liquidVault);
 
-        // [Todo]: Makes LPs for early users (a DGVC-ETH pair holders)
-        liquidVault.purchaseLP();  // [Note]: Is this purchase LP method needed?
+        // Check locked-period of msg.sender
+        address holder;
+        uint amount;
+        uint timestamp;
+        bool claimed;
+        (holder, amount, timestamp, claimed) = _getLockedLP(liquidVault, msg.sender, position);
 
-        // [Todo]: Claim LPs (ProjectToken-ETH pair) in the LiquidVault
-        liquidVault.claimLP(); 
-
-        // [Todo]: Check whether msg.sender is early user or not
-        address earlyUser = msg.sender;
-
-        address PROJECT_TOKEN = address(projectToken);
-        address PAIR = uniswapV2Factory.getPair(PROJECT_TOKEN, WETH);
-        IUniswapV2Pair lpProjectTokenEth = IUniswapV2Pair(PAIR);
-
-        uint totalSupplyOfLpProjectTokenEth = lpProjectTokenEth.totalSupply();
-
-        // [Todo]: Check share of LPs (ProjectToken - ETH pair) of a early user who call this method
-        uint share;
-
-        // [Todo]: Based on share, how much amount should be transferred into a early user is identified
-        uint amount = totalSupplyOfLpProjectTokenEth.mul(share).div(100);
-
-        // [Todo]: Transfer LPs (ProjectToken - ETH pair) into early users
-        lpProjectTokenEth.transfer(earlyUser, amount);
+        // Claim LPs (ProjectToken-ETH pair) in the LiquidVault
+        _claimLP(liquidVault);
     }
 
 
@@ -129,11 +115,25 @@ contract AutonomousDegenVCV2 {
         liquidVault.claimLP(); 
     }
 
-    // @notice - Makes LPs for early users (a DGVC-ETH pair holders)
+    // @notice - Send ETH to match with the ProjectTokens in LiquidVault
     function _purchaseLP(LiquidVault liquidVault) internal returns (bool) {
-        liquidVault.purchaseLP();
+        liquidVault.purchaseLP{ value: msg.value }();
     }
 
+    // @notice - Get a locked-LP 
+    function _getLockedLP(LiquidVault liquidVault, address holder_, uint position) 
+        internal 
+        view 
+        returns (address _holder, uint _amount, uint _timestamp, bool _claimed) 
+    {
+        address holder;
+        uint amount;
+        uint timestamp;
+        bool claimed;
+        (holder, amount, timestamp, claimed) = liquidVault.getLockedLP(holder_, position);
+
+        return (holder, amount, timestamp, claimed);
+    }
 
 
     //----------------
