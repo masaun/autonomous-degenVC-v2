@@ -84,7 +84,7 @@ contract AutonomousDegenVCV2 {
     } 
 
     /**
-     * @notice - ③ Claim LP for early users.
+     * @notice - ③ A user claim LP.
      */
     function claimLP(LiquidVault liquidVault, IProjectToken projectToken) public {
         address LIQUID_VAULT = address(liquidVault);
