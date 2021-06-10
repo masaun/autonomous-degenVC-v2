@@ -56,6 +56,7 @@ contract AutonomousDegenVCV2 {
 
     /**
      * @notice - ① A Uniswap market is created for the new project
+     * @notice - This method can be replaced with purchaseLP() method in the LiquidVault.sol
      */
     function createUniswapMarketForProject(
         IProjectToken projectToken,
@@ -84,17 +85,8 @@ contract AutonomousDegenVCV2 {
     function capitalizeWithProjectTokens(
         LiquidVault liquidVault, 
         IProjectToken projectToken, 
-        uint capitalizedAmount,
-
-        uint amountTokenDesired,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline
+        uint capitalizedAmount
     ) public payable returns (bool) {
-        // @notice - Create a Uniswap LP token 
-        createUniswapMarketForProject(projectToken, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline);
-
         // @notice - Initial top up a Liquid Vault with project token
         address LIQUID_VAULT = address(liquidVault);
         projectToken.transfer(LIQUID_VAULT, capitalizedAmount);
@@ -103,12 +95,22 @@ contract AutonomousDegenVCV2 {
     /**
      * @notice - ③ A user send ETH into a Liquid Vault
      */
-    function purchaseLP(LiquidVault liquidVault) payable public {
+    function purchaseLP(
+        LiquidVault liquidVault
+        uint amountTokenDesired,
+        uint amountTokenMin,
+        uint amountETHMin,
+        address to,
+        uint deadline
+    ) payable public {
         // @notice - Send ETH from msg.sender
         // @notice - Swap ETH sent for LPs. (Then, LPs swapped will be locked in the LiquidVault)
         liquidVault.purchaseLP{ value: msg.value }();
         //_purchaseLP{ value: msg.value }(liquidVault);        
-    }    
+
+        // @notice - Create a Uniswap LP token. (<--This method can be replaced with purchaseLP() method in the LiquidVault.sol. Therefore, this method inherited are commentouted)
+        //createUniswapMarketForProject(projectToken, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline);
+    } 
 
     /**
      * @notice - ③ Claim LP for early users.
