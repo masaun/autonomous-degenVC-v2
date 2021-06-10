@@ -55,30 +55,6 @@ contract AutonomousDegenVCV2 {
     }
 
     /**
-     * @notice - ① A Uniswap market is created for the new project
-     * @notice - This method can be replaced with purchaseLP() method in the LiquidVault.sol
-     */
-    function createUniswapMarketForProject(
-        IProjectToken projectToken,
-        uint amountTokenDesired,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline
-    ) public payable returns (bool) {
-        require(msg.value >= amountETHMin, "msg.value should be more than amountETHMin");
-        /// [Note]: In advance, "amountTokenDesired" should be approved in FE
-        projectToken.transferFrom(msg.sender, address(this), amountTokenDesired);
-
-        /// [Note]: Approve ProjectToken for addLiquidity
-        projectToken.approve(UNISWAP_V2_ROUTER_02, amountTokenDesired);  /// [Note]: Approve ProjectToken for addLiquidity
-
-        /// Add ProjectToken/WETH liquidity
-        /// [Note]: This contract itself has to transfer ETH into UniswapV2Router02 contract
-        uniswapV2Router02.addLiquidityETH{ value: msg.value }(address(projectToken), amountTokenDesired, amountTokenMin, amountETHMin, to, deadline);
-    }
-
-    /**
      * @notice - ② A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
      *             (A Liquid Vault is topped up with project tokens)
      */
@@ -97,19 +73,11 @@ contract AutonomousDegenVCV2 {
      */
     function purchaseLP(
         LiquidVault liquidVault
-        uint amountTokenDesired,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline
     ) payable public {
         // @notice - Send ETH from msg.sender
         // @notice - Swap ETH sent for LPs. (Then, LPs swapped will be locked in the LiquidVault)
         liquidVault.purchaseLP{ value: msg.value }();
-        //_purchaseLP{ value: msg.value }(liquidVault);        
-
-        // @notice - Create a Uniswap LP token. (<--This method can be replaced with purchaseLP() method in the LiquidVault.sol. Therefore, this method inherited are commentouted)
-        //createUniswapMarketForProject(projectToken, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline);
+        //_purchaseLP{ value: msg.value }(liquidVault);
     } 
 
     /**
