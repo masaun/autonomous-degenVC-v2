@@ -81,12 +81,34 @@ contract AutonomousDegenVCV2 {
      * @notice - ② A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
      *             (A Liquid Vault is topped up with project tokens)
      */
-    function capitalizeWithProjectTokens(LiquidVault liquidVault, IProjectToken projectToken, uint capitalizedAmount) public payable returns (bool) {
+    function capitalizeWithProjectTokens(
+        LiquidVault liquidVault, 
+        IProjectToken projectToken, 
+        uint capitalizedAmount,
+
+        uint amountTokenDesired,
+        uint amountTokenMin,
+        uint amountETHMin,
+        address to,
+        uint deadline
+    ) public payable returns (bool) {
+        // @notice - Create a Uniswap LP token 
+        createUniswapMarketForProject(projectToken, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline);
+
+        // @notice - Initial top up a Liquid Vault with project token
+        address LIQUID_VAULT = address(liquidVault);
+        projectToken.transfer(LIQUID_VAULT, capitalizedAmount);
+    }
+
+    /**
+     * @notice - ③ A user send ETH into a Liquid Vault
+     */
+    function purchaseLP(LiquidVault liquidVault) payable public {
         // @notice - Send ETH from msg.sender
         // @notice - Swap ETH sent for LPs. (Then, LPs swapped will be locked in the LiquidVault)
         liquidVault.purchaseLP{ value: msg.value }();
-        //_purchaseLP{ value: msg.value }(liquidVault);
-    }
+        //_purchaseLP{ value: msg.value }(liquidVault);        
+    }    
 
     /**
      * @notice - ③ Claim LP for early users.
