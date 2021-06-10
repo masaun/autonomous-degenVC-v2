@@ -55,51 +55,39 @@ contract AutonomousDegenVCV2 {
     }
 
     /**
-     * @notice - ① A Uniswap market is created for the new project
+     * @notice - ① A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
+     *             (A Liquid Vault is topped up with project tokens)
      */
-    function createUniswapMarketForProject(
-        IProjectToken projectToken,
-        uint amountTokenDesired,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline
+    function capitalizeWithProjectTokens(
+        LiquidVault liquidVault, 
+        IProjectToken projectToken, 
+        uint capitalizedAmount
     ) public payable returns (bool) {
-        require(msg.value >= amountETHMin, "msg.value should be more than amountETHMin");
-        /// [Note]: In advance, "amountTokenDesired" should be approved in FE
-        projectToken.transferFrom(msg.sender, address(this), amountTokenDesired);
+        projectToken.transferFrom(msg.sender, address(this), capitalizedAmount);
 
-        /// [Note]: Approve ProjectToken for addLiquidity
-        projectToken.approve(UNISWAP_V2_ROUTER_02, amountTokenDesired);  /// [Note]: Approve ProjectToken for addLiquidity
-
-        /// Add ProjectToken/WETH liquidity
-        /// [Note]: This contract itself has to transfer ETH into UniswapV2Router02 contract
-        uniswapV2Router02.addLiquidityETH{ value: msg.value }(address(projectToken), amountTokenDesired, amountTokenMin, amountETHMin, to, deadline);
+        // @notice - Initial top up a Liquid Vault with project token
+        address LIQUID_VAULT = address(liquidVault);
+        projectToken.transfer(LIQUID_VAULT, capitalizedAmount);
     }
 
     /**
-     * @notice - ② A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
-     *             (A Liquid Vault is topped up with project tokens)
+     * @notice - ② A user send ETH into a Liquid Vault and swap ETH sent for LPs
+     *             (Then, LPs swapped will be locked in the LiquidVault)
      */
-    function capitalizeWithProjectTokens(LiquidVault liquidVault, IProjectToken projectToken, uint capitalizedAmount) public payable returns (bool) {
+    function purchaseLP(
+        LiquidVault liquidVault
+    ) payable public {
         // @notice - Send ETH from msg.sender
         // @notice - Swap ETH sent for LPs. (Then, LPs swapped will be locked in the LiquidVault)
         liquidVault.purchaseLP{ value: msg.value }();
         //_purchaseLP{ value: msg.value }(liquidVault);
-    }
+    } 
 
     /**
      * @notice - ③ Claim LP for early users.
      */
-    function claimEarlyLP(LiquidVault liquidVault, IProjectToken projectToken, uint position) public {
+    function claimLP(LiquidVault liquidVault, IProjectToken projectToken) public {
         address LIQUID_VAULT = address(liquidVault);
-
-        // Check locked-period of msg.sender
-        address holder;
-        uint amount;
-        uint timestamp;
-        bool claimed;
-        (holder, amount, timestamp, claimed) = _getLockedLP(liquidVault, msg.sender, position);
 
         // Claim LPs (ProjectToken-ETH pair) in the LiquidVault
         _claimLP(liquidVault);
@@ -121,8 +109,8 @@ contract AutonomousDegenVCV2 {
     }
 
     // @notice - Get a locked-LP 
-    function _getLockedLP(LiquidVault liquidVault, address holder_, uint position) 
-        internal 
+    function getLockedLP(LiquidVault liquidVault, address holder_, uint position) 
+        public
         view 
         returns (address _holder, uint _amount, uint _timestamp, bool _claimed) 
     {
