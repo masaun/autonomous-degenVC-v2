@@ -12,7 +12,7 @@ contract LiquidVaultFactory {
     constructor() public {}
 
     /**
-     * @notice - Create a Liquid Vault for a project
+     * @notice - Create a new Liquid Vault contract for a project
      */
     function createLiquidVault(
         uint32 duration,

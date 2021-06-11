@@ -140,10 +140,10 @@ contract("AutonomousDegenVCV2", function(accounts) {
         it("[Step 2]: Create a Liquid Vault", async () => {
             /// [Todo]: Replace assigned-value with exact value
             const duration = 0
-            const feeDistributor = deployer
+            const feeDistributor = deployer  // [Todo]: Replace assigned-address with deployed-address of the FeeDistributor contract
             const feeReceiver = user1
             const donationShare = 1   // LP Token
-            const purchaseFee = 1 　　 // ETH
+            const purchaseFee = 1 　　// ETH
             let txReceipt = await liquidVaultFactory.createLiquidVault(duration, PROJECT_TOKEN, UNISWAP_V2_PAIR, UNISWAP_V2_ROUTER_02, feeDistributor, feeReceiver, donationShare, purchaseFee, { from: deployer })
 
             let event = await getEvents(liquidVaultFactory, "LiquidVaultCreated")
@@ -152,7 +152,7 @@ contract("AutonomousDegenVCV2", function(accounts) {
         })
 
         it("[Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
-            const capitalizedAmount = web3.utils.toWei('0.1', 'ether')
+            const capitalizedAmount = web3.utils.toWei('0.5', 'ether')  // 0.5 Project Token that is topped up into the Liquid Vault
 
             const projectTokenBalance = await projectToken.balanceOf(deployer)
             console.log('=== projectTokenBalance (of deployer) ===', String(projectTokenBalance))
@@ -163,6 +163,9 @@ contract("AutonomousDegenVCV2", function(accounts) {
 
         it("[Step 4]: A user purchase LP tokens by sending ETH", async () => {
             const ethAmount = web3.utils.toWei('0.5', 'ether')  /// 0.5 ETH
+
+            //liquidValut = await LiquidVault.at(LIQUID_VAULT)
+            //let txReceipt = await liquidValut.purchaseLP({ from: deployer, value: ethAmount })
             let txReceipt = await autonomousDegenVC.purchaseLP(LIQUID_VAULT, { from: deployer, value: ethAmount })
         })
 
