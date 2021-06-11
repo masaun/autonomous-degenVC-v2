@@ -191,7 +191,7 @@ contract("AutonomousDegenVCV2", function(accounts) {
         })
 
         it("[Step 6]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
-            const capitalizedAmount = web3.utils.toWei('0.5', 'ether')  // 0.5 Project Token that is topped up into the Liquid Vault
+            const capitalizedAmount = web3.utils.toWei('20000', 'ether')  // 20,000 Project Token that is topped up into the Liquid Vault
 
             const projectTokenBalance = await projectToken.balanceOf(deployer)
             console.log('=== projectTokenBalance (of deployer) ===', String(projectTokenBalance))
@@ -200,8 +200,8 @@ contract("AutonomousDegenVCV2", function(accounts) {
             let txReceipt2 = await autonomousDegenVC.capitalizeWithProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, capitalizedAmount, { from: deployer })
         })
 
-        it("[Step 4]: A user purchase LP tokens by sending ETH", async () => {
-            const ethAmount = web3.utils.toWei('0.5', 'ether')  /// 0.5 ETH
+        it("[Step 4]: A user purchase LP tokens by sending 1 ETH", async () => {
+            const ethAmount = web3.utils.toWei('1', 'ether')  /// 1 ETH
 
             //liquidValut = await LiquidVault.at(LIQUID_VAULT)
             //let txReceipt = await liquidValut.purchaseLP({ from: deployer, value: ethAmount })
