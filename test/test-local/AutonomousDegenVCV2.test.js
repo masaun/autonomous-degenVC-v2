@@ -160,6 +160,16 @@ contract("AutonomousDegenVCV2", function(accounts) {
             let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, capitalizedAmount, { from: deployer })
             let txReceipt2 = await autonomousDegenVC.capitalizeWithProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, capitalizedAmount, { from: deployer })
         })
+
+        it("[Step 4]: A user purchase LP tokens by sending ETH", async () => {
+            const ethAmount = web3.utils.toWei('0.5', 'ether')  /// 0.5 ETH
+            let txReceipt = await autonomousDegenVC.purchaseLP(LIQUID_VAULT, { from: deployer, value: ethAmount })
+        })
+
+        it("[Step 5]: A user claim LP tokens", async () => {
+            let txReceipt = await autonomousDegenVC.claimLP(LIQUID_VAULT, PROJECT_TOKEN, { from: deployer })
+        })
+
     })
 
     describe("\n Check final result", () => {
