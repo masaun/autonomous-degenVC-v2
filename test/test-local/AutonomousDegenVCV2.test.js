@@ -12,6 +12,7 @@ const tokenAddressList = require("../../migrations/addressesList/tokenAddress/to
 /// Artifact of smart contracts 
 const AutonomousDegenVCV2 = artifacts.require("AutonomousDegenVCV2")
 const LiquidVaultFactory = artifacts.require("LiquidVaultFactory")
+const FeeDistributorFactory = artifacts.require("FeeDistributorFactory")
 const ProjectTokenFactory = artifacts.require("ProjectTokenFactory")
 const LiquidVault = artifacts.require("LiquidVault")
 const ProjectToken = artifacts.require("ProjectToken")
@@ -39,6 +40,7 @@ contract("AutonomousDegenVCV2", function(accounts) {
     /// Global contract instance
     let autonomousDegenVC
     let liquidVaultFactory
+    let feeDistributorFactory
     let projectTokenFactory
     let liquidVault
     let projectToken
@@ -49,6 +51,7 @@ contract("AutonomousDegenVCV2", function(accounts) {
     /// Global variable for each contract addresses
     let AUTONOMOUS_DEGEN_VC
     let LIQUID_VAULT_FACTORY
+    let FEE_DISTRIBUTOR_FACTORY
     let PROJECT_TOKEN_FACTORY
     let LIQUID_VAULT
     let PROJECT_TOKEN
@@ -91,6 +94,11 @@ contract("AutonomousDegenVCV2", function(accounts) {
             LIQUID_VAULT_FACTORY = liquidVaultFactory.address
         })
 
+        it("Deploy the FeeDistributorFactory contract instance", async () => {
+            feeDistributorFactory = await FeeDistributorFactory.new({ from: deployer })
+            FEE_DISTRIBUTOR_FACTORY = feeDistributorFactory.address
+        })
+
         it("Deploy the ProjectTokenFactory contract instance", async () => {
             projectTokenFactory = await ProjectTokenFactory.new({ from: deployer })
             PROJECT_TOKEN_FACTORY = projectTokenFactory.address
@@ -107,6 +115,7 @@ contract("AutonomousDegenVCV2", function(accounts) {
 
         it("[Log]: Deployer-contract addresses", async () => {
             console.log('\n=== LIQUID_VAULT_FACTORY ===', LIQUID_VAULT_FACTORY)
+            console.log('=== FEE_DISTRIBUTOR_FACTORY ===', FEE_DISTRIBUTOR_FACTORY)
             console.log('=== PROJECT_TOKEN_FACTORY ===', PROJECT_TOKEN_FACTORY)
             console.log('=== AUTONOMOUS_DEGEN_VC ===', AUTONOMOUS_DEGEN_VC)
             console.log('=== UNISWAP_V2_FACTORY ===', UNISWAP_V2_FACTORY)
