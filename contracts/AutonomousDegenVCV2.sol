@@ -56,6 +56,29 @@ contract AutonomousDegenVCV2 {
     }
 
     /**
+     * @notice - ① A Uniswap market is created for the new project
+     */
+    function createUniswapMarketForProject(
+        IProjectToken projectToken,
+        uint amountTokenDesired,
+        uint amountTokenMin,
+        uint amountETHMin,
+        address to,
+        uint deadline
+    ) public payable returns (bool) {
+        require(msg.value >= amountETHMin, "msg.value should be more than amountETHMin");
+        /// [Note]: In advance, "amountTokenDesired" should be approved in FE
+        projectToken.transferFrom(msg.sender, address(this), amountTokenDesired);
+
+        /// [Note]: Approve ProjectToken for addLiquidity
+        projectToken.approve(UNISWAP_V2_ROUTER_02, amountTokenDesired);  /// [Note]: Approve ProjectToken for addLiquidity
+
+        /// Add ProjectToken/WETH liquidity
+        /// [Note]: This contract itself has to transfer ETH into UniswapV2Router02 contract
+        uniswapV2Router02.addLiquidityETH{ value: msg.value }(address(projectToken), amountTokenDesired, amountTokenMin, amountETHMin, to, deadline);
+    }
+
+    /**
      * @notice - ① A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
      *             (A Liquid Vault is topped up with project tokens)
      */
@@ -122,6 +145,10 @@ contract AutonomousDegenVCV2 {
         (holder, amount, timestamp, claimed) = liquidVault.getLockedLP(holder_, position);
 
         return (holder, amount, timestamp, claimed);
+    }
+
+    function getPair(address token0, address token1) public view returns (address pair) {
+        return uniswapV2Factory.getPair(token0, token1);
     }
 
 
