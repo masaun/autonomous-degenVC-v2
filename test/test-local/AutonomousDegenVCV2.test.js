@@ -36,6 +36,7 @@ contract("AutonomousDegenVCV2", function(accounts) {
     let user1 = accounts[1]
     let user2 = accounts[2]
     let user3 = accounts[3]
+    let feeReceiver = accounts[4]
 
     /// Global contract instance
     let autonomousDegenVC
@@ -43,6 +44,7 @@ contract("AutonomousDegenVCV2", function(accounts) {
     let feeDistributorFactory
     let projectTokenFactory
     let liquidVault
+    let feeDistributor
     let projectToken
     let lp          /// UniswapV2Pair (ProjectToken-ETH pair)
     let lpDgvcEth   /// UniswapV2Pair (DGVC-ETH pair)
@@ -54,9 +56,18 @@ contract("AutonomousDegenVCV2", function(accounts) {
     let FEE_DISTRIBUTOR_FACTORY
     let PROJECT_TOKEN_FACTORY
     let LIQUID_VAULT
+    let FEE_DISTRIBUTOR
     let PROJECT_TOKEN
     let LP              /// UniswapV2Pair (ProjectToken-ETH pair)
     let LP_DGVC_ETH     /// UniswapV2Pair (DGVC-ETH pair)
+
+    /// Global variables (for injecting "seed" of the LiquidVault and the FeeDistributor contracts)
+    const stakeDuration = 1
+    const donationShare = 10
+    const purchaseFee = 30
+    const liquidVaultShare = 80
+    const burnPercentage = 10
+
 
     async function getEvents(contractInstance, eventName) {
         const _latestBlock = await time.latestBlock()
@@ -147,20 +158,39 @@ contract("AutonomousDegenVCV2", function(accounts) {
         })
 
         it("[Step 2]: Create a Liquid Vault", async () => {
-            /// [Todo]: Replace assigned-value with exact value
-            const duration = 0
-            const feeDistributor = deployer  // [Todo]: Replace assigned-address with deployed-address of the FeeDistributor contract
-            const feeReceiver = user1
-            const donationShare = 1   // LP Token
-            const purchaseFee = 1 　　// ETH
-            let txReceipt = await liquidVaultFactory.createLiquidVault(duration, PROJECT_TOKEN, UNISWAP_V2_PAIR, UNISWAP_V2_ROUTER_02, feeDistributor, feeReceiver, donationShare, purchaseFee, { from: deployer })
+            let txReceipt = await liquidVaultFactory.createLiquidVault({ from: deployer })
 
             let event = await getEvents(liquidVaultFactory, "LiquidVaultCreated")
             LIQUID_VAULT = event._liquidVault
             console.log('\n=== LIQUID_VAULT ===', LIQUID_VAULT)
         })
 
-        it("[Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
+        it("[Step 3]: Create a FeeDistributor", async () => {
+            let txReceipt = await feeDistributorFactory.createFeeDistributor({ from: deployer })
+
+            let event = await getEvents(feeDistributorFactory, "FeeDistributorCreated")
+            FEE_DISTRIBUTOR = event._feeDistributor
+            console.log('\n=== FEE_DISTRIBUTOR ===', FEE_DISTRIBUTOR)
+        })
+
+        it("[Step 4]: Inject Seed into a LiquidVault", async () => {
+            let txReceipt = await liquidVaultFactory.injectSeedIntoLiquidVault(LIQUID_VAULT, stakeDuration, PROJECT_TOKEN, UNISWAP_V2_PAIR, UNISWAP_V2_ROUTER_02, FEE_DISTRIBUTOR, feeReceiver, donationShare, purchaseFee, { from: deployer })
+
+            let event = await getEvents(liquidVaultFactory, "LiquidVaultSeeded")
+            LIQUID_VAULT = event._liquidVault
+            console.log('\n=== LIQUID_VAULT (Seeded) ===', LIQUID_VAULT)
+        })
+
+        it("[Step 5]: Inject Seed into a FeeDistributor", async () => {
+            const secondaryAddress = feeReceiver
+            let txReceipt = await feeDistributorFactory.injectSeedIntoFeeDistributor(FEE_DISTRIBUTOR, PROJECT_TOKEN, LIQUID_VAULT, secondaryAddress, liquidVaultShare, burnPercentage, { from: deployer })
+
+            let event = await getEvents(feeDistributorFactory, "FeeDistributorSeeded")
+            FEE_DISTRIBUTOR = event._feeDistributor
+            console.log('\n=== FEE_DISTRIBUTOR (Seeded) ===', FEE_DISTRIBUTOR)
+        })
+
+        it("[Step 6]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
             const capitalizedAmount = web3.utils.toWei('0.5', 'ether')  // 0.5 Project Token that is topped up into the Liquid Vault
 
             const projectTokenBalance = await projectToken.balanceOf(deployer)

@@ -8,24 +8,32 @@ contract FeeDistributorFactory {
     address[] public feeDistributors;
 
     event FeeDistributorCreated(FeeDistributor _feeDistributor);
+    event FeeDistributorSeeded(FeeDistributor _feeDistributor);
 
     constructor() public {}
 
     /**
      * @notice - Create a new FeeDistributor contract for a project
      */
-    function createFeeDistributor(
+    function createFeeDistributor() public returns (bool) {
+        FeeDistributor feeDistributor = new FeeDistributor();
+        //feeDistributor.seed(projectToken, vault, secondaryAddress, liquidVaultShare, burnPercentage);
+        feeDistributors.push(address(feeDistributor));
+
+        emit FeeDistributorCreated(feeDistributor);
+    }
+
+    function injectSeedIntoFeeDistributor(
+        FeeDistributor feeDistributor,
         address projectToken,
         address vault,
         address secondaryAddress,
         uint liquidVaultShare,
         uint burnPercentage
     ) public returns (bool) {
-        FeeDistributor feeDistributor = new FeeDistributor();
         feeDistributor.seed(projectToken, vault, secondaryAddress, liquidVaultShare, burnPercentage);
-        feeDistributors.push(address(feeDistributor));
 
-        emit FeeDistributorCreated(feeDistributor);
+        emit FeeDistributorSeeded(feeDistributor);
     }
 
 }
