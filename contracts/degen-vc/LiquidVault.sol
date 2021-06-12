@@ -196,8 +196,8 @@ contract LiquidVault is Ownable {
         purchaseLPFor(msg.sender);
     }
 
-    //@notice - Tokens (per second) as staking reward 
-    function pendingRewards() public {        
+    //@notice - Claim project tokens (per second) as staking reward 
+    function claimRewards() public {        
         // Identify a LPbatch (Locked-LP)
         address holder;
         uint amount;
@@ -240,6 +240,9 @@ contract LiquidVault is Ownable {
             config.tokenPair.transfer(batch.holder, batch.amount - donation),
             "LiquidVault: transfer failed in LP claim."
         );
+
+        // Claim project tokens as staking reward
+        claimRewards();
     }
 
     function lockedLPLength(address holder) public view returns (uint) {
