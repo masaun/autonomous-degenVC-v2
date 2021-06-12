@@ -128,9 +128,9 @@ contract AutonomousDegenVCV2 {
     }
 
     // @notice - Send ETH to match with the ProjectTokens in LiquidVault
-    function _purchaseLP(LiquidVault liquidVault) internal returns (bool) {
-        liquidVault.purchaseLP{ value: msg.value }();
-    }
+    //function _purchaseLP(LiquidVault liquidVault) internal returns (bool) {
+    //    liquidVault.purchaseLP{ value: msg.value }();
+    //}
 
     // @notice - Get a locked-LP 
     function getLockedLP(LiquidVault liquidVault, address holder_, uint position) 
