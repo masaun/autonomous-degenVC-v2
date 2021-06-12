@@ -13,7 +13,7 @@ import { IFeeDistributor } from "./IFeeDistributor.sol";
 contract LiquidVault is Ownable {
     using SafeMath for uint;
 
-    uint REWARD_AMOUNT_PER_SECOND = 10;  // [Default]: 10 project token is distributed per second
+    uint REWARD_AMOUNT_PER_SECOND = 1 * 1e15;  // [Default]: 0.001 project token is distributed per second
 
     /** Emitted when purchaseLP() is called to track ETH amounts */
     event EthTransferred(
@@ -191,12 +191,16 @@ contract LiquidVault is Ownable {
          emit EthTransferred(msg.sender, exchangeValue, feeValue);
     }
 
-    //@notice - Send ETH to mint LP tokens (ProjectToken - ETH pair) in LiquidVault
+    /**
+     * @notice - Send ETH to mint LP tokens (ProjectToken - ETH pair) in LiquidVault
+     */
     function purchaseLP() public payable {
         purchaseLPFor(msg.sender);
     }
 
-    //@notice - Claim project tokens (per second) as staking reward 
+    /**
+     * @notice - Claim project tokens (per second) as staking reward 
+     */
     function claimRewards() public {        
         // Identify a LPbatch (Locked-LP)
         address holder;
@@ -215,7 +219,9 @@ contract LiquidVault is Ownable {
         IERC20(config.projectToken).transfer(holder, rewardAmount);
     }
 
-
+    /**
+     * @notice - Claim LP tokens (ProjectToken - ETH pair)
+     */
     function claimLP() public {
         uint next = queueCounter[msg.sender];
         require(
