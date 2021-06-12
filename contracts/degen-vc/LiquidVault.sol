@@ -77,7 +77,7 @@ contract LiquidVault is Ownable {
         address feeDistributor,
         address payable feeReceiver,
         uint8 donationShare, // LP Token
-        uint8 purchaseFee // ETH
+        uint8 purchaseFee    // ETH
     ) public onlyOwner {
         config.projectToken = projectToken;
         config.uniswapRouter = IUniswapV2Router02(uniswapRouter);
@@ -126,23 +126,23 @@ contract LiquidVault is Ownable {
 
     function purchaseLPFor(address beneficiary) public payable lock {
         config.feeDistributor.distributeFees();
-        require(msg.value > 0, "LiquidVault: ETH required to mint INFINITY LP");
+        require(msg.value > 0, "LiquidVault: ETH required to mint LP tokens (which is a ProjectToken-ETH pair)");
 
         uint feeValue = (config.purchaseFee * msg.value) / 100;
         uint exchangeValue = msg.value - feeValue;
 
         (uint reserve1, uint reserve2, ) = config.tokenPair.getReserves();
 
-        uint infinityRequired;
+        uint projectTokenRequired;
 
         if (address(config.projectToken) < address(config.weth)) {
-              infinityRequired = config.uniswapRouter.quote(
+              projectTokenRequired = config.uniswapRouter.quote(
                   exchangeValue,
                   reserve2,
                   reserve1
               );
         } else {
-              infinityRequired = config.uniswapRouter.quote(
+              projectTokenRequired = config.uniswapRouter.quote(
                   exchangeValue,
                   reserve1,
                   reserve2
@@ -151,8 +151,8 @@ contract LiquidVault is Ownable {
 
         uint balance = IERC20(config.projectToken).balanceOf(address(this));
         require(
-              balance >= infinityRequired,
-              "LiquidVault: insufficient INFINITY tokens in LiquidVault"
+              balance >= projectTokenRequired,
+              "LiquidVault: insufficient ProjectTokens in LiquidVault"
         );
 
         IWETH(config.weth).deposit{ value: exchangeValue }();
@@ -160,7 +160,7 @@ contract LiquidVault is Ownable {
         IWETH(config.weth).transfer(tokenPairAddress, exchangeValue);
         IERC20(config.projectToken).transfer(
             tokenPairAddress,
-            infinityRequired
+            projectTokenRequired
         );
 
         uint liquidityCreated = config.tokenPair.mint(address(this));
@@ -179,14 +179,14 @@ contract LiquidVault is Ownable {
             beneficiary,
             liquidityCreated,
             exchangeValue,
-            infinityRequired,
+            projectTokenRequired,
             block.timestamp
         );
 
          emit EthTransferred(msg.sender, exchangeValue, feeValue);
     }
 
-    //send ETH to match with the ProjectTokens in LiquidVault
+    //@notice - Send ETH to mint LP tokens (ProjectToken - ETH pair) in LiquidVault
     function purchaseLP() public payable {
         purchaseLPFor(msg.sender);
     }
