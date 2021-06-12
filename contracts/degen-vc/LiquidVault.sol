@@ -191,6 +191,11 @@ contract LiquidVault is Ownable {
         purchaseLPFor(msg.sender);
     }
 
+    //@notice - Tokens (per second) as staking reward 
+    function pendingRewards() public {
+        // [Todo]:
+    }
+
     function claimLP() public {
         uint next = queueCounter[msg.sender];
         require(
