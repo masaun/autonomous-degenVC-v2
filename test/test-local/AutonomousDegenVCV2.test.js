@@ -25,7 +25,7 @@ const IUniswapV2Factory = artifacts.require("IUniswapV2Factory")
 //const UNISWAP_V2_PAIR = contractAddressList["Mainnet"]["UniswapV2"]["UniswapV2Pair"]["DGVC-ETH"]  /// UNI-LP Token (DGVC - ETH pair)
 const UNISWAP_V2_ROUTER_02 = contractAddressList["Mainnet"]["UniswapV2"]["UniswapV2Router02"]
 const UNISWAP_V2_FACTORY = contractAddressList["Mainnet"]["UniswapV2"]["UniswapV2Factory"]
-//const WETH = tokenAddressList["Mainnet"]["WETH"]  /// Wrappered ETH (ERC20)
+const WETH = tokenAddressList["Mainnet"]["WETH"]  /// Wrappered ETH (ERC20)
 
 /**
  * @notice - This is the test of AutonomousDegenVCV2.sol
@@ -47,7 +47,6 @@ contract("AutonomousDegenVCV2", function(accounts) {
     let liquidVault
     let feeDistributor
     let projectToken
-    let weth
     let lp          /// UniswapV2Pair (ProjectToken-ETH pair)
     let lpDgvcEth   /// UniswapV2Pair (DGVC-ETH pair)
     let uniswapV2Factory
@@ -60,7 +59,6 @@ contract("AutonomousDegenVCV2", function(accounts) {
     let LIQUID_VAULT
     let FEE_DISTRIBUTOR
     let PROJECT_TOKEN
-    let WETH
     let LP              /// UniswapV2Pair (ProjectToken-ETH pair)
     let LP_DGVC_ETH     /// UniswapV2Pair (DGVC-ETH pair)
 
@@ -88,11 +86,6 @@ contract("AutonomousDegenVCV2", function(accounts) {
     } 
 
     describe("Setup smart-contracts", () => {
-        it("Deploy the WETH token contract instance", async () => {
-            weth = await MockWETH.new({ from: deployer })
-            WETH = weth.address
-        })
-
         it("Deploy the UNI-V2 LP Token (DGVC-ETH pair) contract instance", async () => {
             lpDgvcEth = await MockLpToken.new({ from: deployer })
             LP_DGVC_ETH = lpDgvcEth.address
