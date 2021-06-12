@@ -6,6 +6,7 @@ import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { MockLpToken } from "./mock/MockLpToken.sol";  /// [Note]: This is a mock UNI-V2 LP token (DGVC-ETH pair)
 import { IProjectToken } from "./IProjectToken.sol";
 import { LiquidVault } from "./degen-vc/LiquidVault.sol";
+import { FeeDistributor } from "./degen-vc/FeeDistributor.sol";
 
 import { IUniswapV2Router02 } from "./uniswap-v2/uniswap-v2-periphery/interfaces/IUniswapV2Router02.sol";
 import { IUniswapV2Factory } from "./uniswap-v2/uniswap-v2-core/interfaces/IUniswapV2Factory.sol";
@@ -52,6 +53,29 @@ contract AutonomousDegenVCV2 {
         UNISWAP_V2_ROUTER_02 = address(uniswapV2Router02);
         UNISWAP_V2_FACTORY = address(uniswapV2Factory);
         WETH = address(wETH);
+    }
+
+    /**
+     * @notice - ① A Uniswap market is created for the new project
+     */
+    function createUniswapMarketForProject(
+        IProjectToken projectToken,
+        uint amountTokenDesired,
+        uint amountTokenMin,
+        uint amountETHMin,
+        address to,
+        uint deadline
+    ) public payable returns (bool) {
+        require(msg.value >= amountETHMin, "msg.value should be more than amountETHMin");
+        /// [Note]: In advance, "amountTokenDesired" should be approved in FE
+        projectToken.transferFrom(msg.sender, address(this), amountTokenDesired);
+
+        /// [Note]: Approve ProjectToken for addLiquidity
+        projectToken.approve(UNISWAP_V2_ROUTER_02, amountTokenDesired);  /// [Note]: Approve ProjectToken for addLiquidity
+
+        /// Add ProjectToken/WETH liquidity
+        /// [Note]: This contract itself has to transfer ETH into UniswapV2Router02 contract
+        uniswapV2Router02.addLiquidityETH{ value: msg.value }(address(projectToken), amountTokenDesired, amountTokenMin, amountETHMin, to, deadline);
     }
 
     /**
@@ -121,6 +145,10 @@ contract AutonomousDegenVCV2 {
         (holder, amount, timestamp, claimed) = liquidVault.getLockedLP(holder_, position);
 
         return (holder, amount, timestamp, claimed);
+    }
+
+    function getPair(address token0, address token1) public view returns (address pair) {
+        return uniswapV2Factory.getPair(token0, token1);
     }
 
 

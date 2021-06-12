@@ -12,15 +12,17 @@ const tokenAddressList = require("../../migrations/addressesList/tokenAddress/to
 /// Artifact of smart contracts 
 const AutonomousDegenVCV2 = artifacts.require("AutonomousDegenVCV2")
 const LiquidVaultFactory = artifacts.require("LiquidVaultFactory")
+const FeeDistributorFactory = artifacts.require("FeeDistributorFactory")
 const ProjectTokenFactory = artifacts.require("ProjectTokenFactory")
 const LiquidVault = artifacts.require("LiquidVault")
 const ProjectToken = artifacts.require("ProjectToken")
+const MockWETH = artifacts.require("MockWETH")
 const MockLpToken = artifacts.require("MockLpToken")
 const IUniswapV2Pair = artifacts.require("IUniswapV2Pair")
 const IUniswapV2Factory = artifacts.require("IUniswapV2Factory")
 
 /// Deployed-addresses
-const UNISWAP_V2_PAIR = contractAddressList["Mainnet"]["UniswapV2"]["UniswapV2Pair"]["DGVC-ETH"]  /// UNI-LP Token (DGVC - ETH pair)
+//const UNISWAP_V2_PAIR = contractAddressList["Mainnet"]["UniswapV2"]["UniswapV2Pair"]["DGVC-ETH"]  /// UNI-LP Token (DGVC - ETH pair)
 const UNISWAP_V2_ROUTER_02 = contractAddressList["Mainnet"]["UniswapV2"]["UniswapV2Router02"]
 const UNISWAP_V2_FACTORY = contractAddressList["Mainnet"]["UniswapV2"]["UniswapV2Factory"]
 const WETH = tokenAddressList["Mainnet"]["WETH"]  /// Wrappered ETH (ERC20)
@@ -35,12 +37,15 @@ contract("AutonomousDegenVCV2", function(accounts) {
     let user1 = accounts[1]
     let user2 = accounts[2]
     let user3 = accounts[3]
+    let feeReceiver = accounts[4]
 
     /// Global contract instance
     let autonomousDegenVC
     let liquidVaultFactory
+    let feeDistributorFactory
     let projectTokenFactory
     let liquidVault
+    let feeDistributor
     let projectToken
     let lp          /// UniswapV2Pair (ProjectToken-ETH pair)
     let lpDgvcEth   /// UniswapV2Pair (DGVC-ETH pair)
@@ -49,11 +54,21 @@ contract("AutonomousDegenVCV2", function(accounts) {
     /// Global variable for each contract addresses
     let AUTONOMOUS_DEGEN_VC
     let LIQUID_VAULT_FACTORY
+    let FEE_DISTRIBUTOR_FACTORY
     let PROJECT_TOKEN_FACTORY
     let LIQUID_VAULT
+    let FEE_DISTRIBUTOR
     let PROJECT_TOKEN
     let LP              /// UniswapV2Pair (ProjectToken-ETH pair)
     let LP_DGVC_ETH     /// UniswapV2Pair (DGVC-ETH pair)
+
+    /// Global variables (for injecting "seed" of the LiquidVault and the FeeDistributor contracts)
+    const stakeDuration = 1
+    const donationShare = 10
+    const purchaseFee = 30
+    const liquidVaultShare = 80
+    const burnPercentage = 10
+
 
     async function getEvents(contractInstance, eventName) {
         const _latestBlock = await time.latestBlock()
@@ -91,6 +106,11 @@ contract("AutonomousDegenVCV2", function(accounts) {
             LIQUID_VAULT_FACTORY = liquidVaultFactory.address
         })
 
+        it("Deploy the FeeDistributorFactory contract instance", async () => {
+            feeDistributorFactory = await FeeDistributorFactory.new({ from: deployer })
+            FEE_DISTRIBUTOR_FACTORY = feeDistributorFactory.address
+        })
+
         it("Deploy the ProjectTokenFactory contract instance", async () => {
             projectTokenFactory = await ProjectTokenFactory.new({ from: deployer })
             PROJECT_TOKEN_FACTORY = projectTokenFactory.address
@@ -107,6 +127,7 @@ contract("AutonomousDegenVCV2", function(accounts) {
 
         it("[Log]: Deployer-contract addresses", async () => {
             console.log('\n=== LIQUID_VAULT_FACTORY ===', LIQUID_VAULT_FACTORY)
+            console.log('=== FEE_DISTRIBUTOR_FACTORY ===', FEE_DISTRIBUTOR_FACTORY)
             console.log('=== PROJECT_TOKEN_FACTORY ===', PROJECT_TOKEN_FACTORY)
             console.log('=== AUTONOMOUS_DEGEN_VC ===', AUTONOMOUS_DEGEN_VC)
             console.log('=== UNISWAP_V2_FACTORY ===', UNISWAP_V2_FACTORY)
@@ -138,21 +159,68 @@ contract("AutonomousDegenVCV2", function(accounts) {
         })
 
         it("[Step 2]: Create a Liquid Vault", async () => {
-            /// [Todo]: Replace assigned-value with exact value
-            const duration = 0
-            const feeDistributor = deployer
-            const feeReceiver = user1
-            const donationShare = 1   // LP Token
-            const purchaseFee = 1 　　 // ETH
-            let txReceipt = await liquidVaultFactory.createLiquidVault(duration, PROJECT_TOKEN, UNISWAP_V2_PAIR, UNISWAP_V2_ROUTER_02, feeDistributor, feeReceiver, donationShare, purchaseFee, { from: deployer })
+            let txReceipt = await liquidVaultFactory.createLiquidVault({ from: deployer })
 
             let event = await getEvents(liquidVaultFactory, "LiquidVaultCreated")
             LIQUID_VAULT = event._liquidVault
             console.log('\n=== LIQUID_VAULT ===', LIQUID_VAULT)
         })
 
-        it("[Step 3]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
-            const capitalizedAmount = web3.utils.toWei('0.1', 'ether')
+        it("[Step 3]: Create a FeeDistributor", async () => {
+            let txReceipt = await feeDistributorFactory.createFeeDistributor({ from: deployer })
+
+            let event = await getEvents(feeDistributorFactory, "FeeDistributorCreated")
+            FEE_DISTRIBUTOR = event._feeDistributor
+            console.log('\n=== FEE_DISTRIBUTOR ===', FEE_DISTRIBUTOR)
+        })
+
+        it("[Step 6]: A uniswap market is created for the new project", async () => {
+            const amountTokenDesired = web3.utils.toWei('10000', 'ether')    /// 10,000 TPT (ProjectTokens)
+            const amountTokenMin = web3.utils.toWei('0', 'ether')  /// [Note]: When initial addLiquidity(), this is 0
+            const amountETHMin = web3.utils.toWei('0', 'ether')    /// [Note]: When initial addLiquidity(), this is 0
+            const to = deployer  /// [Note]: your address, because you're the one who gets the fees later
+            const deadline = Date.now() + 3000   /// Now + 3000 seconds
+            console.log('\n=== deadline ===', deadline)  /// e.g). 1620193601002
+
+            const initialLiquidityEthAmount = web3.utils.toWei('10', 'ether')  /// 10 ETH
+
+            let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, amountTokenDesired, { from: deployer })
+            let txReceipt2 = await autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline, { from: deployer, value: initialLiquidityEthAmount })  
+        })
+
+        it("Should assign LP address (ProjectToken-ETH pair)", async () => {
+            LP = await autonomousDegenVC.getPair(PROJECT_TOKEN, WETH)
+            console.log('\n=== LP (ProjectToken-ETH pair) ===', LP)      
+        })
+
+        it("[Step 4]: Inject Seed into a LiquidVault", async () => {
+            let txReceipt = await liquidVaultFactory.injectSeedIntoLiquidVault(LIQUID_VAULT, 
+                                                                               stakeDuration, 
+                                                                               PROJECT_TOKEN, 
+                                                                               LP,  // [Note]: UNI-V2 LP token (ProjectToken - ETH pair) 
+                                                                               UNISWAP_V2_ROUTER_02, 
+                                                                               FEE_DISTRIBUTOR, 
+                                                                               feeReceiver, 
+                                                                               donationShare, 
+                                                                               purchaseFee, 
+                                                                               { from: deployer })
+
+            let event = await getEvents(liquidVaultFactory, "LiquidVaultSeeded")
+            LIQUID_VAULT = event._liquidVault
+            console.log('\n=== LIQUID_VAULT (Seeded) ===', LIQUID_VAULT)
+        })
+
+        it("[Step 5]: Inject Seed into a FeeDistributor", async () => {
+            const secondaryAddress = feeReceiver
+            let txReceipt = await feeDistributorFactory.injectSeedIntoFeeDistributor(FEE_DISTRIBUTOR, PROJECT_TOKEN, LIQUID_VAULT, secondaryAddress, liquidVaultShare, burnPercentage, { from: deployer })
+
+            let event = await getEvents(feeDistributorFactory, "FeeDistributorSeeded")
+            FEE_DISTRIBUTOR = event._feeDistributor
+            console.log('\n=== FEE_DISTRIBUTOR (Seeded) ===', FEE_DISTRIBUTOR)
+        })
+
+        it("[Step 7]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
+            const capitalizedAmount = web3.utils.toWei('20000', 'ether')  // 20,000 Project Token that is topped up into the Liquid Vault
 
             const projectTokenBalance = await projectToken.balanceOf(deployer)
             console.log('=== projectTokenBalance (of deployer) ===', String(projectTokenBalance))
@@ -161,8 +229,11 @@ contract("AutonomousDegenVCV2", function(accounts) {
             let txReceipt2 = await autonomousDegenVC.capitalizeWithProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, capitalizedAmount, { from: deployer })
         })
 
-        it("[Step 4]: A user purchase LP tokens by sending ETH", async () => {
-            const ethAmount = web3.utils.toWei('0.5', 'ether')  /// 0.5 ETH
+        it("[Step 4]: A user purchase LP tokens by sending 1 ETH", async () => {
+            const ethAmount = web3.utils.toWei('1', 'ether')  /// 1 ETH
+
+            //liquidValut = await LiquidVault.at(LIQUID_VAULT)
+            //let txReceipt = await liquidValut.purchaseLP({ from: deployer, value: ethAmount })
             let txReceipt = await autonomousDegenVC.purchaseLP(LIQUID_VAULT, { from: deployer, value: ethAmount })
         })
 
