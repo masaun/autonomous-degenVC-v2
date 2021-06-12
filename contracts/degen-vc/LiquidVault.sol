@@ -2,6 +2,7 @@
 pragma solidity 0.7.4;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IUniswapV2Router02 } from "../uniswap-v2/uniswap-v2-periphery/interfaces/IUniswapV2Router02.sol";
 import { IWETH } from "../uniswap-v2/uniswap-v2-periphery/interfaces/IWETH.sol";
@@ -10,6 +11,10 @@ import { IFeeDistributor } from "./IFeeDistributor.sol";
 
 
 contract LiquidVault is Ownable {
+    using SafeMath for uint;
+
+    uint REWARD_AMOUNT_PER_SECOND = 10;  // [Default]: 10 project token is distributed per second
+
     /** Emitted when purchaseLP() is called to track ETH amounts */
     event EthTransferred(
         address from,
@@ -192,9 +197,24 @@ contract LiquidVault is Ownable {
     }
 
     //@notice - Tokens (per second) as staking reward 
-    function pendingRewards() public {
-        // [Todo]:
+    function pendingRewards() public {        
+        // Identify a LPbatch (Locked-LP)
+        address holder;
+        uint amount;
+        uint timestamp;  // [Note]: Starting timestamp to be locked
+        bool claimed;
+        (holder, amount, timestamp, claimed) = getLockedLP(msg.sender, 0);
+
+        require(holder == msg.sender, "Holder must be msg.sender");
+    
+        // Calculate staked-time (unit is "second")
+        uint stakedSeconds = block.timestamp.sub(timestamp);  // [Note]: Total staked-time (Unit is "second")
+
+        // Distribute reward tokens into a user
+        uint rewardAmount = REWARD_AMOUNT_PER_SECOND.mul(stakedSeconds);
+        IERC20(config.projectToken).transfer(holder, rewardAmount);
     }
+
 
     function claimLP() public {
         uint next = queueCounter[msg.sender];
