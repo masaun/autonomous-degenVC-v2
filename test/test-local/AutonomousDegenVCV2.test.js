@@ -16,7 +16,6 @@ const FeeDistributorFactory = artifacts.require("FeeDistributorFactory")
 const ProjectTokenFactory = artifacts.require("ProjectTokenFactory")
 const LiquidVault = artifacts.require("LiquidVault")
 const ProjectToken = artifacts.require("ProjectToken")
-const MockWETH = artifacts.require("MockWETH")
 const MockLpToken = artifacts.require("MockLpToken")
 const IUniswapV2Pair = artifacts.require("IUniswapV2Pair")
 const IUniswapV2Factory = artifacts.require("IUniswapV2Factory")
@@ -237,7 +236,13 @@ contract("AutonomousDegenVCV2", function(accounts) {
             let txReceipt = await autonomousDegenVC.purchaseLP(LIQUID_VAULT, { from: deployer, value: ethAmount })
         })
 
-        it("[Step 5]: A user claim LP tokens", async () => {
+        it("[Step 5]: After 1 weeks from purchase LP, a user claim LP tokens", async () => {
+            /// [Note]: "block.timestamp - batch.timestamp" must be greater than "stakeDuration"
+            /// [Note]: Increase time (to 1 week ahead)
+            const duration = 60 * 60 * 24 * 7  /// 1 week
+            await time.increase(duration)
+
+            /// Claim LP
             let txReceipt = await autonomousDegenVC.claimLP(LIQUID_VAULT, PROJECT_TOKEN, { from: deployer })
         })
 
