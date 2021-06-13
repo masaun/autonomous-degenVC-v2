@@ -275,11 +275,9 @@ contract LiquidVault is Ownable {
         uint discountedRate;
 
         // [Todo]: Adjut a condition (Constant valut -> Variable value)
-        if (stakedPeriod < 10000) {         // 10000 seconds
+        if (stakedPeriod < 1 days) {           // Less than 60 * 60 * 24 seconds (24 hour)
             discountedRate = 10;  // 10%
-        } else if (stakedPeriod < 20000) {  // 20000 seconds
-            discountedRate = 30;  // 30%
-        } else if (stakedPeriod < 30000) {  // 30000 seconds
+        } else if (stakedPeriod >= 1 days) {   // Greater than 60 * 60 * 24 seconds (24 hour)
             discountedRate = 50;  // 50%
         }
 
