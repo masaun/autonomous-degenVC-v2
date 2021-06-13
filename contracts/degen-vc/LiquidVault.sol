@@ -224,9 +224,21 @@ contract LiquidVault is Ownable {
      * @notice - Claim LP tokens (ProjectToken - ETH pair)
      */
     function claimLP() public {
+        // Identify a LPbatch (Locked-LP)
+        address holder;
+        uint amount;
+        uint timestamp;  // [Note]: Starting timestamp to be locked
+        bool claimed;
+        (holder, amount, timestamp, claimed) = getLockedLP(msg.sender, 0);
+
+        // Check
+        require(holder == msg.sender, "Holder must be msg.sender");
+    
+        // Calculate staked-time (unit is "second")
+        uint stakedSeconds = block.timestamp.sub(timestamp);  // [Note]: Total staked-time (Unit is "second")
+
         // Get a discounted-rate
-        uint stakedPeriod;  // [Todo]: Assign a formula that calculate staked-period of a user
-        uint discountedRate = getDiscountRate(msg.sender, stakedPeriod);
+        uint discountedRate = getDiscountRate(msg.sender, stakedSeconds);
 
         uint next = queueCounter[msg.sender];
         require(
