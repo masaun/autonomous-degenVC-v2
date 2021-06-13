@@ -160,7 +160,7 @@ contract LiquidVault is Ownable {
               "LiquidVault: insufficient ProjectTokens in LiquidVault"
         );
 
-        IWETH(config.weth).deposit{ value: exchangeValue }();
+        IWETH(config.weth).deposit{ value: exchangeValue }();  // Convert ETH to WETH
         address tokenPairAddress = address(config.tokenPair);
         IWETH(config.weth).transfer(tokenPairAddress, exchangeValue);
         IERC20(config.projectToken).transfer(
@@ -168,6 +168,7 @@ contract LiquidVault is Ownable {
             projectTokenRequired
         );
 
+        //@notice - LP tokens (ProjectToken - ETH pair) are minted
         uint liquidityCreated = config.tokenPair.mint(address(this));
         config.feeReceiver.transfer(feeValue);
 
@@ -250,6 +251,24 @@ contract LiquidVault is Ownable {
         // Claim project tokens as staking reward
         claimRewards();
     }
+
+    /**
+     * @notice - a condition in order to adjust the `"discounted-rate" depends on `staking period` (=how many seconds a user staked)
+     */
+    function getDiscountRate(address user, uint stakedPeriod) public view returns (uint _discountedRate) {
+        uint discountedRate;
+
+        // [Todo]: Adjut a condition
+        if (stakedPeriod < 10000) {         // 10000 seconds
+            discountedRate = 10;  // 10%
+        } else if (stakedPeriod < 20000) {  // 20000 seconds
+            discountedRate = 30;  // 30%
+        } else if (stakedPeriod < 30000) {  // 30000 seconds
+            discountedRate = 50;  // 50%
+        }
+
+        return discountedRate;
+    }    
 
     function lockedLPLength(address holder) public view returns (uint) {
         return lockedLP[holder].length;
