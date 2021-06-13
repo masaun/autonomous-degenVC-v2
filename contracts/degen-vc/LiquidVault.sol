@@ -224,6 +224,10 @@ contract LiquidVault is Ownable {
      * @notice - Claim LP tokens (ProjectToken - ETH pair)
      */
     function claimLP() public {
+        // Get a discounted-rate
+        uint stakedPeriod;  // [Todo]: Assign a formula that calculate staked-period of a user
+        uint discountedRate = getDiscountRate(msg.sender, stakedPeriod);
+
         uint next = queueCounter[msg.sender];
         require(
             next < lockedLP[msg.sender].length,
@@ -258,7 +262,7 @@ contract LiquidVault is Ownable {
     function getDiscountRate(address user, uint stakedPeriod) public view returns (uint _discountedRate) {
         uint discountedRate;
 
-        // [Todo]: Adjut a condition
+        // [Todo]: Adjut a condition (Constant valut -> Variable value)
         if (stakedPeriod < 10000) {         // 10000 seconds
             discountedRate = 10;  // 10%
         } else if (stakedPeriod < 20000) {  // 20000 seconds
