@@ -220,7 +220,8 @@ contract("AutonomousDegenVCV2", function(accounts) {
 
         it("[Step 6]: Set a discounted-rate (10%)", async () => {
             const discountedRate = 10  /// 10%
-            let txReceipt = await autonomousDegenVC.setDiscountedRate(LIQUID_VAULT, discountedRate, { from: deployer })
+            const caller = deployer; 
+            let txReceipt = await autonomousDegenVC.setDiscountedRate(LIQUID_VAULT, discountedRate, caller, { from: deployer })
         })
 
         it("[Step 7]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {

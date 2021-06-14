@@ -284,7 +284,8 @@ contract LiquidVault is Ownable {
     /**
      * @notice - Set a discounted-rate (0% ~ 100%)
      */
-    function setDiscountedRate(uint discountedRate) public onlyOwner returns (bool) {
+    function setDiscountedRate(uint discountedRate, address caller) public returns (bool) {
+        //require(caller == owner(), "Caller should be owner");
         DISCOUNTED_RATE = discountedRate;
     }
 

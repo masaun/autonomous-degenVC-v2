@@ -97,8 +97,8 @@ contract AutonomousDegenVCV2 {
     /**
      * @notice - Set a discounted-rate (0% ~ 100%)
      */
-    function setDiscountedRate(LiquidVault liquidVault, uint discountedRate) public returns (bool) {
-        _setDiscountedRate(liquidVault, discountedRate);
+    function setDiscountedRate(LiquidVault liquidVault, uint discountedRate, address caller) public returns (bool) {
+        _setDiscountedRate(liquidVault, discountedRate, caller);
     }
 
     /**
@@ -141,8 +141,8 @@ contract AutonomousDegenVCV2 {
     //}
 
     // @notice - Set a discounted-rate (0% ~ 100%)
-    function _setDiscountedRate(LiquidVault liquidVault, uint discountedRate) public returns (bool) {
-        liquidVault.setDiscountedRate(discountedRate);
+    function _setDiscountedRate(LiquidVault liquidVault, uint discountedRate, address caller) internal returns (bool) {
+        liquidVault.setDiscountedRate(discountedRate, caller);
     }
 
     // @notice - Get a locked-LP 
