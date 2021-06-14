@@ -97,9 +97,9 @@ contract AutonomousDegenVCV2 {
     /**
      * @notice - Set a discounted-rate (0% ~ 100%)
      */
-    function setDiscountedRate(LiquidVault liquidVault, uint discountedRate, address caller) public returns (bool) {
-        _setDiscountedRate(liquidVault, discountedRate, caller);
-    }
+    //function setDiscountedRate(LiquidVault liquidVault, uint discountedRate, address caller) public returns (bool) {
+    //    _setDiscountedRate(liquidVault, discountedRate, caller);
+    //}
 
     /**
      * @notice - ② A user send ETH into a Liquid Vault and swap ETH sent for LPs
@@ -141,9 +141,9 @@ contract AutonomousDegenVCV2 {
     //}
 
     // @notice - Set a discounted-rate (0% ~ 100%)
-    function _setDiscountedRate(LiquidVault liquidVault, uint discountedRate, address caller) internal returns (bool) {
-        liquidVault.setDiscountedRate(discountedRate, caller);
-    }
+    //function _setDiscountedRate(LiquidVault liquidVault, uint discountedRate, address caller) internal returns (bool) {
+    //    liquidVault.setDiscountedRate(discountedRate, caller);
+    //}
 
     // @notice - Get a locked-LP 
     function getLockedLP(LiquidVault liquidVault, address holder_, uint position) 
