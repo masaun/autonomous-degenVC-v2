@@ -13,8 +13,11 @@ import { IFeeDistributor } from "./IFeeDistributor.sol";
 contract LiquidVault is Ownable {
     using SafeMath for uint;
 
+    uint DISCOUNTED_RATE;  // 0 ~ 100 (%)
+    uint constant ONE_HUNDRED_PERCENT = 100;  // 100 (%)
+
     uint REWARD_AMOUNT_PER_SECOND = 1 * 1e15;  // [Default]: 0.001 project token is distributed per second
-    uint DISCOUNTED_RATE;
+
 
     /** Emitted when purchaseLP() is called to track ETH amounts */
     event EthTransferred(
@@ -275,6 +278,19 @@ contract LiquidVault is Ownable {
      */
     function setDiscountedRate(uint discountedRate) public onlyOwner returns (bool) {
         DISCOUNTED_RATE = discountedRate;
+    }
+
+    /**
+     * @notice - get "ETH fee" required
+     *           (On the assumption that the exchange rate of "ProjectToken : ETH" is "1 token : 1 ETH")
+     *           e.g). In case of the discounted-rate is 50%, ETH fee required is 1.0 ETH
+     *           e.g). In case of the discounted-rate is 10%, ETH fee required is 1.8 ETH
+     */
+    function getETHFeeRequired(uint sentETHAmount) public view returns (uint _ethFee) {
+        uint discountedRate = getDiscountedRate();
+
+        uint ethFee = sentETHAmount.div(ONE_HUNDRED_PERCENT.mul(discountedRate).div(100));
+        return ethFee;
     }
 
     /**
