@@ -13,12 +13,11 @@ import { IFeeDistributor } from "./IFeeDistributor.sol";
 contract LiquidVault is Ownable {
     using SafeMath for uint;
 
-    uint MINIMUM_LOCKED_PERIOD = 1 days;  // 60 * 60 * 24 seconds (24 hour)
+    uint DISCOUNTED_RATE;                          // The discounted-rate that is set between 0 ~ 100 (%)
+    uint REWARD_AMOUNT_PER_SECOND = 1 * 1e15;      // [Default]: 0.001 project token is distributed per second
 
-    uint DISCOUNTED_RATE;  // 0 ~ 100 (%)
-    uint constant ONE_HUNDRED_PERCENT = 100;  // 100 (%)
-
-    uint REWARD_AMOUNT_PER_SECOND = 1 * 1e15;  // [Default]: 0.001 project token is distributed per second
+    uint constant MINIMUM_LOCKED_PERIOD = 1 days;  // 24 hour (60 * 60 * 24 seconds)
+    uint constant ONE_HUNDRED_PERCENT = 100;       // 100 (%)
 
     /** Emitted when purchaseLP() is called to track ETH amounts */
     event EthTransferred(
@@ -135,6 +134,9 @@ contract LiquidVault is Ownable {
     }
 
     function purchaseLPFor(address beneficiary) public payable lock {
+        uint ethFeeRequired = getEthFeeRequired(msg.value);
+        require(msg.value == ethFeeRequired, "LiquidVault: ETH fee sent should be equal to ETH fee required");
+
         config.feeDistributor.distributeFees();
         require(msg.value > 0, "LiquidVault: ETH required to mint LP tokens (which is a ProjectToken-ETH pair)");
 
@@ -293,11 +295,11 @@ contract LiquidVault is Ownable {
      *           e.g). In case of the discounted-rate is 50%, ETH fee required is 1.0 ETH
      *           e.g). In case of the discounted-rate is 10%, ETH fee required is 1.8 ETH
      */
-    function getETHFeeRequired(uint sentETHAmount) public view returns (uint _ethFee) {
+    function getEthFeeRequired(uint sentEthAmount) public view returns (uint _ethFeeRequired) {
         uint discountedRate = getDiscountedRate();
 
-        uint ethFee = sentETHAmount.div(ONE_HUNDRED_PERCENT.mul(discountedRate).div(100));
-        return ethFee;
+        uint ethFeeRequired = sentEthAmount.div(ONE_HUNDRED_PERCENT.mul(discountedRate).div(100));
+        return ethFeeRequired;
     }
 
     /**
