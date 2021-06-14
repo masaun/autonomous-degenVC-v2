@@ -13,11 +13,12 @@ import { IFeeDistributor } from "./IFeeDistributor.sol";
 contract LiquidVault is Ownable {
     using SafeMath for uint;
 
+    uint MINIMUM_LOCKED_PERIOD = 1 days;  // 60 * 60 * 24 seconds (24 hour)
+
     uint DISCOUNTED_RATE;  // 0 ~ 100 (%)
     uint constant ONE_HUNDRED_PERCENT = 100;  // 100 (%)
 
     uint REWARD_AMOUNT_PER_SECOND = 1 * 1e15;  // [Default]: 0.001 project token is distributed per second
-
 
     /** Emitted when purchaseLP() is called to track ETH amounts */
     event EthTransferred(
@@ -66,17 +67,17 @@ contract LiquidVault is Ownable {
     bool public forceUnlock;
     bool private locked;
 
+    LiquidVaultConfig public config;
+
+    mapping(address => LPbatch[]) public lockedLP;
+    mapping(address => uint) public queueCounter;
+
     modifier lock {
         require(!locked, "LiquidVault: reentrancy violation");
         locked = true;
         _;
         locked = false;
     }
-
-    LiquidVaultConfig public config;
-
-    mapping(address => LPbatch[]) public lockedLP;
-    mapping(address => uint) public queueCounter;
 
     function seed(
         uint32 duration,
@@ -219,6 +220,9 @@ contract LiquidVault is Ownable {
         // Calculate staked-time (unit is "second")
         uint stakedSeconds = block.timestamp.sub(timestamp);  // [Note]: Total staked-time (Unit is "second")
 
+        // Check whether stakedPeriod of user has passed a minimum locked-period (1 day) or not
+        _checkMinimumLockedPeriod(msg.sender, stakedSeconds);
+
         // Distribute reward tokens into a user
         uint rewardAmount = REWARD_AMOUNT_PER_SECOND.mul(stakedSeconds);
         IERC20(config.projectToken).transfer(holder, rewardAmount);
@@ -235,11 +239,14 @@ contract LiquidVault is Ownable {
         bool claimed;
         (holder, amount, timestamp, claimed) = getLockedLP(msg.sender, 0);
 
-        // Check
+        // Check whether msg.sender is holder or not
         require(holder == msg.sender, "Holder must be msg.sender");
     
         // Calculate staked-time (unit is "second")
         uint stakedSeconds = block.timestamp.sub(timestamp);  // [Note]: Total staked-time (Unit is "second")
+
+        // Check whether stakedPeriod of user has passed a minimum locked-period (1 day) or not
+        _checkMinimumLockedPeriod(msg.sender, stakedSeconds);
 
         // Get a discounted-rate
         uint discountedRate = getDiscountedRate();
@@ -297,20 +304,15 @@ contract LiquidVault is Ownable {
      * @notice - a condition in order to adjust the `"discounted-rate" depends on `staking period` (=how many seconds a user staked)
      */
     function getDiscountedRate() public view returns (uint _discountedRate) {
-    // function getDiscountedRate(address user, uint stakedPeriod) public view returns (uint _discountedRate) {
-
-        // uint discountedRate;
-
-        // // [Todo]: Adjut a condition (Constant valut -> Variable value)
-        // if (stakedPeriod < 1 days) {           // Less than 60 * 60 * 24 seconds (24 hour)
-        //     discountedRate = 10;  // 10%
-        // } else if (stakedPeriod >= 1 days) {   // Greater than 60 * 60 * 24 seconds (24 hour)
-        //     discountedRate = 50;  // 50%
-        // }
-
         return DISCOUNTED_RATE;
-        // return discountedRate;
-    }    
+    }
+
+    /**
+     * @notice - Check whether stakedPeriod of user has passed a minimum locked-period (1 day) or not
+     */
+    function _checkMinimumLockedPeriod(address user, uint stakedPeriod) internal {
+        require(stakedPeriod > MINIMUM_LOCKED_PERIOD, "LiquidVault: staked-period has not passed the minimum locked-period yet");
+    }
 
     function lockedLPLength(address holder) public view returns (uint) {
         return lockedLP[holder].length;
