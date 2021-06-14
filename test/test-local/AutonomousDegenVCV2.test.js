@@ -68,6 +68,9 @@ contract("AutonomousDegenVCV2", function(accounts) {
     const liquidVaultShare = 80
     const burnPercentage = 10
 
+    function toWei(amount) {
+        return web3.utils.toWei(`${ amount }`, 'ether')
+    }
 
     async function getEvents(contractInstance, eventName) {
         const _latestBlock = await time.latestBlock()
@@ -219,7 +222,7 @@ contract("AutonomousDegenVCV2", function(accounts) {
         })
 
         it("[Step 6]: Set a discounted-rate (10%)", async () => {
-            const discountedRate = 10  /// 10%
+            const discountedRate = toWei(10)  /// 10%
             const caller = deployer; 
             let txReceipt = await autonomousDegenVC.setDiscountedRate(LIQUID_VAULT, discountedRate, caller, { from: deployer })
         })
