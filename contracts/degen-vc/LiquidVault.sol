@@ -14,6 +14,7 @@ contract LiquidVault is Ownable {
     using SafeMath for uint;
 
     uint REWARD_AMOUNT_PER_SECOND = 1 * 1e15;  // [Default]: 0.001 project token is distributed per second
+    uint DISCOUNTED_RATE;
 
     /** Emitted when purchaseLP() is called to track ETH amounts */
     event EthTransferred(
@@ -160,7 +161,7 @@ contract LiquidVault is Ownable {
               "LiquidVault: insufficient ProjectTokens in LiquidVault"
         );
 
-        IWETH(config.weth).deposit{ value: exchangeValue }();
+        IWETH(config.weth).deposit{ value: exchangeValue }();  // Convert ETH to WETH
         address tokenPairAddress = address(config.tokenPair);
         IWETH(config.weth).transfer(tokenPairAddress, exchangeValue);
         IERC20(config.projectToken).transfer(
@@ -168,6 +169,7 @@ contract LiquidVault is Ownable {
             projectTokenRequired
         );
 
+        //@notice - LP tokens (ProjectToken - ETH pair) are minted
         uint liquidityCreated = config.tokenPair.mint(address(this));
         config.feeReceiver.transfer(feeValue);
 
@@ -223,6 +225,23 @@ contract LiquidVault is Ownable {
      * @notice - Claim LP tokens (ProjectToken - ETH pair)
      */
     function claimLP() public {
+        // Identify a LPbatch (Locked-LP)
+        address holder;
+        uint amount;
+        uint timestamp;  // [Note]: Starting timestamp to be locked
+        bool claimed;
+        (holder, amount, timestamp, claimed) = getLockedLP(msg.sender, 0);
+
+        // Check
+        require(holder == msg.sender, "Holder must be msg.sender");
+    
+        // Calculate staked-time (unit is "second")
+        uint stakedSeconds = block.timestamp.sub(timestamp);  // [Note]: Total staked-time (Unit is "second")
+
+        // Get a discounted-rate
+        uint discountedRate = getDiscountedRate();
+        //uint discountedRate = getDiscountRate(msg.sender, stakedSeconds);
+
         uint next = queueCounter[msg.sender];
         require(
             next < lockedLP[msg.sender].length,
@@ -250,6 +269,32 @@ contract LiquidVault is Ownable {
         // Claim project tokens as staking reward
         claimRewards();
     }
+
+    /**
+     * @notice - Set a discounted-rate (0% ~ 100%)
+     */
+    function setDiscountedRate(uint discountedRate) public onlyOwner returns (bool) {
+        DISCOUNTED_RATE = discountedRate;
+    }
+
+    /**
+     * @notice - a condition in order to adjust the `"discounted-rate" depends on `staking period` (=how many seconds a user staked)
+     */
+    function getDiscountedRate() public view returns (uint _discountedRate) {
+    // function getDiscountedRate(address user, uint stakedPeriod) public view returns (uint _discountedRate) {
+
+        // uint discountedRate;
+
+        // // [Todo]: Adjut a condition (Constant valut -> Variable value)
+        // if (stakedPeriod < 1 days) {           // Less than 60 * 60 * 24 seconds (24 hour)
+        //     discountedRate = 10;  // 10%
+        // } else if (stakedPeriod >= 1 days) {   // Greater than 60 * 60 * 24 seconds (24 hour)
+        //     discountedRate = 50;  // 50%
+        // }
+
+        return DISCOUNTED_RATE;
+        // return discountedRate;
+    }    
 
     function lockedLPLength(address holder) public view returns (uint) {
         return lockedLP[holder].length;
