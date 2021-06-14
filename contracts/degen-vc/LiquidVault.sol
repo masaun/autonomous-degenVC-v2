@@ -14,6 +14,7 @@ contract LiquidVault is Ownable {
     using SafeMath for uint;
 
     uint REWARD_AMOUNT_PER_SECOND = 1 * 1e15;  // [Default]: 0.001 project token is distributed per second
+    uint DISCOUNTED_RATE;
 
     /** Emitted when purchaseLP() is called to track ETH amounts */
     event EthTransferred(
@@ -238,7 +239,8 @@ contract LiquidVault is Ownable {
         uint stakedSeconds = block.timestamp.sub(timestamp);  // [Note]: Total staked-time (Unit is "second")
 
         // Get a discounted-rate
-        uint discountedRate = getDiscountRate(msg.sender, stakedSeconds);
+        uint discountedRate = getDiscountedRate();
+        //uint discountedRate = getDiscountRate(msg.sender, stakedSeconds);
 
         uint next = queueCounter[msg.sender];
         require(
@@ -269,19 +271,29 @@ contract LiquidVault is Ownable {
     }
 
     /**
+     * @notice - Set a discounted-rate (0% ~ 100%)
+     */
+    function setDiscountedRate(uint discountedRate) public onlyOwner returns (bool) {
+        DISCOUNTED_RATE = discountedRate;
+    }
+
+    /**
      * @notice - a condition in order to adjust the `"discounted-rate" depends on `staking period` (=how many seconds a user staked)
      */
-    function getDiscountRate(address user, uint stakedPeriod) public view returns (uint _discountedRate) {
-        uint discountedRate;
+    function getDiscountedRate() public view returns (uint _discountedRate) {
+    // function getDiscountedRate(address user, uint stakedPeriod) public view returns (uint _discountedRate) {
 
-        // [Todo]: Adjut a condition (Constant valut -> Variable value)
-        if (stakedPeriod < 1 days) {           // Less than 60 * 60 * 24 seconds (24 hour)
-            discountedRate = 10;  // 10%
-        } else if (stakedPeriod >= 1 days) {   // Greater than 60 * 60 * 24 seconds (24 hour)
-            discountedRate = 50;  // 50%
-        }
+        // uint discountedRate;
 
-        return discountedRate;
+        // // [Todo]: Adjut a condition (Constant valut -> Variable value)
+        // if (stakedPeriod < 1 days) {           // Less than 60 * 60 * 24 seconds (24 hour)
+        //     discountedRate = 10;  // 10%
+        // } else if (stakedPeriod >= 1 days) {   // Greater than 60 * 60 * 24 seconds (24 hour)
+        //     discountedRate = 50;  // 50%
+        // }
+
+        return DISCOUNTED_RATE;
+        // return discountedRate;
     }    
 
     function lockedLPLength(address holder) public view returns (uint) {
