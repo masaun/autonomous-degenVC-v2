@@ -252,7 +252,6 @@ contract LiquidVault is Ownable {
 
         // Get a discounted-rate
         uint discountedRate = getDiscountedRate();
-        //uint discountedRate = getDiscountRate(msg.sender, stakedSeconds);
 
         uint next = queueCounter[msg.sender];
         require(
