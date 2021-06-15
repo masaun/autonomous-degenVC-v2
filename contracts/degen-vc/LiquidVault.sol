@@ -294,11 +294,12 @@ contract LiquidVault is Ownable {
      *           (On the assumption that the exchange rate of "ProjectToken : ETH" is "1 token : 1 ETH")
      *           e.g). In case of the discounted-rate is 50%, ETH fee required is 1.0 ETH
      *           e.g). In case of the discounted-rate is 10%, ETH fee required is 1.8 ETH
+     * @param purchaseAmount - Purchase amount for LPs
      */
-    function getEthFeeRequired(uint sentEthAmount) public view returns (uint _ethFeeRequired) {
+    function getEthFeeRequired(uint purchaseAmount) public view returns (uint _ethFeeRequired) {
         uint discountedRate = getDiscountedRate();
 
-        uint ethFeeRequired = sentEthAmount.div(ONE_HUNDRED_PERCENT.mul(discountedRate).div(100));
+        uint ethFeeRequired = purchaseAmount.mul(ONE_HUNDRED_PERCENT.sub(discountedRate)).div(100);
         return ethFeeRequired;
     }
 
