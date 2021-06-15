@@ -246,12 +246,6 @@ contract LiquidVault is Ownable {
 
         // Check whether stakedPeriod of user has passed a minimum locked-period (1 day) or not
         _checkMinimumLockedPeriod(msg.sender, stakedSeconds);
-        if (stakedSeconds < 1 days) {
-            // In case of this code, as it is 
-        } else if (stakedSeconds >= 1 days) {
-            DISCOUNTED_RATE = 10;
-            setDiscountedRate(DISCOUNTED_RATE, msg.sender);
-        }
 
         // Get a discounted-rate
         uint discountedRate = getDiscountedRate();
@@ -314,10 +308,20 @@ contract LiquidVault is Ownable {
     }
 
     /**
-     * @notice - Check whether stakedPeriod of user has passed a minimum locked-period (1 day) or not
+     * @notice - Check whether staked-period of user has passed a minimum locked-period (1 day) or not
+     * @notice - Depends on staked-period of a user, discounted-rate is differenct. (10% or 50%) 
      */
-    function _checkMinimumLockedPeriod(address user, uint stakedPeriod) internal returns (bool) {
-        require(stakedPeriod > MINIMUM_LOCKED_PERIOD, "LiquidVault: staked-period has not passed the minimum locked-period yet");
+    function _checkMinimumLockedPeriod(address user, uint stakedSeconds) internal returns (bool) {
+        require(stakedSeconds > MINIMUM_LOCKED_PERIOD, "LiquidVault: staked-period has not passed the minimum locked-period yet");
+        require(stakedSeconds < 1 days, "LiquidVault: staked-period must be more than 1 day (24 hours)");
+        if (stakedSeconds >= 1 days) {          // More than 1 day (24 hour)
+            uint _discountedRate = 10;          // 10% is assigned as the discounted-rate
+            setDiscountedRate(_discountedRate, msg.sender);
+        } else if (stakedSeconds >= 1 weeks) {  // More than 1 week
+            uint _discountedRate = 50;          // 50% is assigned as the discounted-rate
+            setDiscountedRate(_discountedRate, msg.sender);
+        }
+
     }
 
     function lockedLPLength(address holder) public view returns (uint) {
