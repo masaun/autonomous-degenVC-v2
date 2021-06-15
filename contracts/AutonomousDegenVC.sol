@@ -6,6 +6,7 @@ import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { MockLpToken } from "./mock/MockLpToken.sol";  /// [Note]: This is a mock UNI-V2 LP token (DGVC-ETH pair)
 import { IProjectToken } from "./IProjectToken.sol";
 import { LiquidVault } from "./degen-vc/LiquidVault.sol";
+import { FeeDistributor } from "./degen-vc/FeeDistributor.sol";
 
 import { IUniswapV2Router02 } from "./uniswap-v2/uniswap-v2-periphery/interfaces/IUniswapV2Router02.sol";
 import { IUniswapV2Factory } from "./uniswap-v2/uniswap-v2-core/interfaces/IUniswapV2Factory.sol";
@@ -40,7 +41,7 @@ contract AutonomousDegenVC {
     address WETH;
 
     // Define the rate of alphadrop
-    uint public alphadroppedRate = 10;   /// 10%
+    //uint public alphadroppedRate = 10;   /// 10%
 
     constructor(MockLpToken _lpDgvcEth, IUniswapV2Router02 _uniswapV2Router02, IUniswapV2Factory _uniswapV2Factory, IWETH _wETH) public {
         lpDgvcEth = _lpDgvcEth;
@@ -78,89 +79,100 @@ contract AutonomousDegenVC {
     }
 
     /**
-     * @notice - Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP;
-     */    
-    function alphadropPartOfProjectTokens(
-        LiquidVault liquidVault,
-        IProjectToken projectToken, 
-        uint depositProjectTokenAmount,
-        //uint totalAlphadroppedAmount, 
-        address[] memory lpDgvcEthHolders  // [Note]: Assign UNI-LP token holders (= DGVC-ETH pair) from front-end
-    ) public returns (bool) {
-        // Deposit ProjectTokens into this contract
-        projectToken.transferFrom(msg.sender, address(this), depositProjectTokenAmount);
-
-        // TotalSupply of ProjectTokens
-        uint totalSupplyOfProjectToken = projectToken.totalSupply();
-
-        // Calculate total alphadropped-amount of the ProjectTokens
-        uint totalAlphadroppedAmount = totalSupplyOfProjectToken.mul(alphadroppedRate).div(100);
-
-        // The ProjectTokens are alphadropped into each UNI-LP token holders
-        for (uint i=0; i < lpDgvcEthHolders.length; i++) {
-            address lpDgvcEthHolder = lpDgvcEthHolders[i];
-            uint lpDgvcEthBalance = lpDgvcEth.balanceOf(lpDgvcEthHolder);
-            uint lpDgvcEthTotalSupply = lpDgvcEth.totalSupply();
-
-            // Identify share of the LPs
-            // [Note]: To avoid round at first decimal point, "1e18" is multiplied (and then it is divided by 1e18)
-            uint shareOfLpDgvcEth = lpDgvcEthBalance.mul(1e18).div(lpDgvcEthTotalSupply);
-            uint alphadroppedAmount = totalAlphadroppedAmount.mul(shareOfLpDgvcEth).div(1e18);
-            projectToken.transfer(lpDgvcEthHolder, alphadroppedAmount);
-        }
-
-        // Capitalize with remained-ProjectTokens (Transfer remained-ProjectTokens into the LiquidVault)
-        uint capitalizedAmount = projectToken.balanceOf(address(this));
-        //uint capitalizedAmount = depositProjectTokenAmount.sub(totalAlphadroppedAmount);
-        capitalizeWithProjectTokens(liquidVault, projectToken, capitalizedAmount);
-    }
-
-    /**
-     * @notice - ③ A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
+     * @notice - ① A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
+     *             (A Liquid Vault is topped up with project tokens)
      */
-    function capitalizeWithProjectTokens(LiquidVault liquidVault, IProjectToken projectToken, uint capitalizedAmount) public returns (bool) {
-        // [Todo]:
-        //IUniswapV2Pair lp;    // UNI LP token (ProjectToken-ETH)
+    function capitalizeWithProjectTokens(
+        LiquidVault liquidVault, 
+        IProjectToken projectToken, 
+        uint capitalizedAmount
+    ) public payable returns (bool) {
+        projectToken.transferFrom(msg.sender, address(this), capitalizedAmount);
 
+        // @notice - Initial top up a Liquid Vault with project token
         address LIQUID_VAULT = address(liquidVault);
         projectToken.transfer(LIQUID_VAULT, capitalizedAmount);
     }
 
     /**
-     * @notice - ④ Claim LP for early users.
+     * @notice - Set a discounted-rate (0% ~ 100%)
      */
-    function claimEarlyLP(LiquidVault liquidVault, IProjectToken projectToken) public {
+    //function setDiscountedRate(LiquidVault liquidVault, uint discountedRate, address caller) public returns (bool) {
+    //    _setDiscountedRate(liquidVault, discountedRate, caller);
+    //}
+
+    /**
+     * @notice - ② A user send ETH into a Liquid Vault and swap ETH sent for LPs
+     *             (Then, LPs swapped will be locked in the LiquidVault)
+     */
+    function purchaseLP(
+        LiquidVault liquidVault,
+        uint totalPurchaseAmount
+    ) payable public {
+        // @notice - Check whether "ETH fee sent" is equal to "ETH fee required"
+        uint ethFeeRequired = liquidVault.getEthFeeRequired(totalPurchaseAmount);
+        require(msg.value == ethFeeRequired, "LiquidVault: ETH fee sent should be equal to ETH fee required");
+
+        // @notice - Send ETH from msg.sender
+        // @notice - Swap ETH sent for LPs. (Then, LPs swapped will be locked in the LiquidVault)
+        liquidVault.purchaseLP{ value: msg.value }();
+        //_purchaseLP{ value: msg.value }(liquidVault);
+    } 
+
+    /**
+     * @notice - ③ A user claim LP.
+     */
+    function claimLP(LiquidVault liquidVault, IProjectToken projectToken) public {
         address LIQUID_VAULT = address(liquidVault);
 
-        // [Todo]: Makes LPs for early users (a DGVC-ETH pair holders)
-        liquidVault.purchaseLP();  // [Note]: Is this purchase LP method needed?
-
-        // [Todo]: Claim LPs (ProjectToken-ETH pair) in the LiquidVault
-        liquidVault.claimLP(); 
-
-        // [Todo]: Check whether msg.sender is early user or not
-        address earlyUser = msg.sender;
-
-        address PROJECT_TOKEN = address(projectToken);
-        address PAIR = uniswapV2Factory.getPair(PROJECT_TOKEN, WETH);
-        IUniswapV2Pair lpProjectTokenEth = IUniswapV2Pair(PAIR);
-
-        uint totalSupplyOfLpProjectTokenEth = lpProjectTokenEth.totalSupply();
-
-        // [Todo]: Check share of LPs (ProjectToken - ETH pair) of a early user who call this method
-        uint share;
-
-        // [Todo]: Based on share, how much amount should be transferred into a early user is identified
-        uint amount = totalSupplyOfLpProjectTokenEth.mul(share).div(100);
-
-        // [Todo]: Transfer LPs (ProjectToken - ETH pair) into early users
-        lpProjectTokenEth.transfer(earlyUser, amount);
+        // Claim LPs (ProjectToken-ETH pair) in the LiquidVault
+        _claimLP(liquidVault);
     }
 
 
-    ///----------------
-    /// Getter methods
-    ///----------------
+
+    //----------------------------------------------
+    // Inherited-methods from the LiquidVault.sol
+    //----------------------------------------------
+
+    // @notice - Claim LPs (ProjectToken-ETH pair) in the LiquidVault
+    function _claimLP(LiquidVault liquidVault) internal returns (bool) {
+        liquidVault.claimLP(); 
+    }
+
+    // @notice - Send ETH to match with the ProjectTokens in LiquidVault
+    //function _purchaseLP(LiquidVault liquidVault) internal returns (bool) {
+    //    liquidVault.purchaseLP{ value: msg.value }();
+    //}
+
+    // @notice - Set a discounted-rate (0% ~ 100%)
+    //function _setDiscountedRate(LiquidVault liquidVault, uint discountedRate, address caller) internal returns (bool) {
+    //    liquidVault.setDiscountedRate(discountedRate, caller);
+    //}
+
+    // @notice - Get a locked-LP 
+    function getLockedLP(LiquidVault liquidVault, address holder_, uint position) 
+        public
+        view 
+        returns (address _holder, uint _amount, uint _timestamp, bool _claimed) 
+    {
+        address holder;
+        uint amount;
+        uint timestamp;
+        bool claimed;
+        (holder, amount, timestamp, claimed) = liquidVault.getLockedLP(holder_, position);
+
+        return (holder, amount, timestamp, claimed);
+    }
+
+    function getPair(address token0, address token1) public view returns (address pair) {
+        return uniswapV2Factory.getPair(token0, token1);
+    }
+
+
+    //----------------
+    // Getter methods
+    //----------------
     /**
      * @notice - [Todo]: Identify UNI-LP token holders (= DGVC-ETH pair)
      */
