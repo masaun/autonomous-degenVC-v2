@@ -134,9 +134,6 @@ contract LiquidVault is Ownable {
     }
 
     function purchaseLPFor(address beneficiary) public payable lock {
-        uint ethFeeRequired = getEthFeeRequired(msg.value);
-        require(msg.value == ethFeeRequired, "LiquidVault: ETH fee sent should be equal to ETH fee required");
-
         config.feeDistributor.distributeFees();
         require(msg.value > 0, "LiquidVault: ETH required to mint LP tokens (which is a ProjectToken-ETH pair)");
 
@@ -294,7 +291,7 @@ contract LiquidVault is Ownable {
      *           (On the assumption that the exchange rate of "ProjectToken : ETH" is "1 token : 1 ETH")
      *           e.g). In case of the discounted-rate is 50%, ETH fee required is 1.0 ETH
      *           e.g). In case of the discounted-rate is 10%, ETH fee required is 1.8 ETH
-     * @param purchaseAmount - Purchase amount for LPs
+     * @param purchaseAmount - Purchase amount for LPs (=purchaseAmountOfProjectToken + purchaseAmountOfETH)
      */
     function getEthFeeRequired(uint purchaseAmount) public view returns (uint _ethFeeRequired) {
         uint discountedRate = getDiscountedRate();
