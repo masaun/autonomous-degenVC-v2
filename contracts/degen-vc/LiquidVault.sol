@@ -246,6 +246,12 @@ contract LiquidVault is Ownable {
 
         // Check whether stakedPeriod of user has passed a minimum locked-period (1 day) or not
         _checkMinimumLockedPeriod(msg.sender, stakedSeconds);
+        if (stakedSeconds < 1 days) {
+            // In case of this code, as it is 
+        } else if (stakedSeconds >= 1 days) {
+            DISCOUNTED_RATE = 10;
+            setDiscountedRate(DISCOUNTED_RATE, msg.sender);
+        }
 
         // Get a discounted-rate
         uint discountedRate = getDiscountedRate();
@@ -310,7 +316,7 @@ contract LiquidVault is Ownable {
     /**
      * @notice - Check whether stakedPeriod of user has passed a minimum locked-period (1 day) or not
      */
-    function _checkMinimumLockedPeriod(address user, uint stakedPeriod) internal {
+    function _checkMinimumLockedPeriod(address user, uint stakedPeriod) internal returns (bool) {
         require(stakedPeriod > MINIMUM_LOCKED_PERIOD, "LiquidVault: staked-period has not passed the minimum locked-period yet");
     }
 

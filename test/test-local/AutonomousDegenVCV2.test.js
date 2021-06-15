@@ -234,7 +234,7 @@ contract("AutonomousDegenVCV2", function(accounts) {
             //let txReceipt = await autonomousDegenVC.setDiscountedRate(LIQUID_VAULT, discountedRate, caller, { from: deployer })
         })
 
-        it("[Step 8]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
+        it("[Step 8]: A Liquid Vault is capitalized with (topped up with) project tokens", async () => {
             const capitalizedAmount = web3.utils.toWei('20000', 'ether')  // 20,000 Project Token that is topped up into the Liquid Vault
 
             const projectTokenBalance = await projectToken.balanceOf(deployer)
@@ -257,7 +257,7 @@ contract("AutonomousDegenVCV2", function(accounts) {
             let txReceipt = await autonomousDegenVC.purchaseLP(LIQUID_VAULT, totalPurchaseAmount, { from: deployer, value: ethFeeRequired })
         })
 
-        it("[Step 10]: After 1 weeks from purchase LP, a user claim LP tokens + receive some ProjectToken as rewards", async () => {
+        it("[Step 10]: After 1 weeks from purchase LP, a user claim LP tokens + receive some rewards (project tokens)", async () => {
             /// [Note]: "block.timestamp - batch.timestamp" must be greater than "stakeDuration"
             /// [Note]: Increase time (to 1 week ahead)
             const duration = 60 * 60 * 24 * 7  /// 1 week
