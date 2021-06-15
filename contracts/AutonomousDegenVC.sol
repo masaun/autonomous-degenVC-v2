@@ -8,7 +8,6 @@ import { IProjectToken } from "./IProjectToken.sol";
 import { LiquidVault } from "./degen-vc/LiquidVault.sol";
 
 import { IUniswapV2Router02 } from "./uniswap-v2/uniswap-v2-periphery/interfaces/IUniswapV2Router02.sol";
-import { IUniswapV2Factory } from "./uniswap-v2/uniswap-v2-core/interfaces/IUniswapV2Factory.sol";
 import { IUniswapV2Pair } from "./uniswap-v2/uniswap-v2-core/interfaces/IUniswapV2Pair.sol";
 import { IWETH } from "./uniswap-v2/uniswap-v2-periphery/interfaces/IWETH.sol";
 
@@ -28,30 +27,22 @@ contract AutonomousDegenVC {
     MockLpToken public lpDgvcEth;         // UNI LP token (DGVC-ETH)
     //IUniswapV2Pair public lpDgvcEth;    // UNI LP token (DGVC-ETH)
     IUniswapV2Router02 public uniswapV2Router02;
-    IUniswapV2Factory public uniswapV2Factory;
-    IWETH public wETH;
 
     // Contract address of UNI LP token (DGVC-ETH)
     address UNI_LP_DGVC_ETH;
 
     // Contract address of UniswapV2Router02.sol
     address UNISWAP_V2_ROUTER_02;
-    address UNISWAP_V2_FACTORY;
-    address WETH;
 
     // Define the rate of alphadrop
     uint public alphadroppedRate = 10;   /// 10%
 
-    constructor(MockLpToken _lpDgvcEth, IUniswapV2Router02 _uniswapV2Router02, IUniswapV2Factory _uniswapV2Factory, IWETH _wETH) public {
+    constructor(MockLpToken _lpDgvcEth, IUniswapV2Router02 _uniswapV2Router02) public {
         lpDgvcEth = _lpDgvcEth;
         uniswapV2Router02 = _uniswapV2Router02;
-        uniswapV2Factory = _uniswapV2Factory;
-        wETH = _wETH;
 
         UNI_LP_DGVC_ETH = address(lpDgvcEth);
         UNISWAP_V2_ROUTER_02 = address(uniswapV2Router02);
-        UNISWAP_V2_FACTORY = address(uniswapV2Factory);
-        WETH = address(wETH);
     }
 
     /**
@@ -124,34 +115,6 @@ contract AutonomousDegenVC {
 
         address LIQUID_VAULT = address(liquidVault);
         projectToken.transfer(LIQUID_VAULT, capitalizedAmount);
-    }
-
-    /**
-     * @notice - ④ Claim LP for early users.
-     */
-    function claimEarlyLP(LiquidVault liquidVault, IProjectToken projectToken) public {
-        // [Todo]: Claim LPs (ProjectToken-ETH pair) in the LiquidVault
-        address LIQUID_VAULT = address(liquidVault);
-        liquidVault.purchaseLP();  // [Note]: Is this purchase LP method needed?
-        liquidVault.claimLP(); 
-
-        // [Todo]: Check whether msg.sender is early user or not
-        address earlyUser = msg.sender;
-
-        address PROJECT_TOKEN = address(projectToken);
-        address PAIR = uniswapV2Factory.getPair(PROJECT_TOKEN, WETH);
-        IUniswapV2Pair lpProjectTokenEth = IUniswapV2Pair(PAIR);
-
-        uint totalSupplyOfLpProjectTokenEth = lpProjectTokenEth.totalSupply();
-
-        // [Todo]: Check share of LPs (ProjectToken - ETH pair) of a early user who call this method
-        uint share;
-
-        // [Todo]: Based on share, how much amount should be transferred into a early user is identified
-        uint amount = totalSupplyOfLpProjectTokenEth.mul(share).div(100);
-
-        // [Todo]: Transfer LPs (ProjectToken - ETH pair) into early users
-        lpProjectTokenEth.transfer(earlyUser, amount);
     }
 
 

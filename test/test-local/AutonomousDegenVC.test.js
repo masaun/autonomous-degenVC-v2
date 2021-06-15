@@ -27,7 +27,7 @@ const WETH = tokenAddressList["Mainnet"]["WETH"]  /// Wrappered ETH (ERC20)
 
 /**
  * @notice - This is the test of AutonomousDegenVC.sol
- * @notice - [Execution command]: $ truffle test ./test/test-local/AutonomousDegenVC.test.js --network local
+ * @notice - [Execution command]: $ truffle test ./test/test-local/AutonomousDegenVC.test.js
  */
 contract("AutonomousDegenVC", function(accounts) {
     /// Acccounts
@@ -97,7 +97,7 @@ contract("AutonomousDegenVC", function(accounts) {
         })
 
         it("Deploy the AutonomousDegenVC contract instance", async () => {
-            autonomousDegenVC = await AutonomousDegenVC.new(LP_DGVC_ETH, UNISWAP_V2_ROUTER_02, UNISWAP_V2_FACTORY, WETH, { from: deployer })
+            autonomousDegenVC = await AutonomousDegenVC.new(LP_DGVC_ETH, UNISWAP_V2_ROUTER_02, { from: deployer })
             AUTONOMOUS_DEGEN_VC = autonomousDegenVC.address
         })
 
