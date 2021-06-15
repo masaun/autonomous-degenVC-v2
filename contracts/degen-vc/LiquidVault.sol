@@ -313,7 +313,8 @@ contract LiquidVault is Ownable {
      */
     function _checkMinimumLockedPeriod(address user, uint stakedSeconds) internal returns (bool) {
         require(stakedSeconds > MINIMUM_LOCKED_PERIOD, "LiquidVault: staked-period has not passed the minimum locked-period yet");
-        require(stakedSeconds < 1 days, "LiquidVault: staked-period must be more than 1 day (24 hours)");
+        require(stakedSeconds >= 1 days, "LiquidVault: staked-period must be more than 1 day (24 hours)");
+        
         if (stakedSeconds >= 1 days) {          // More than 1 day (24 hour)
             uint _discountedRate = 10;          // 10% is assigned as the discounted-rate
             setDiscountedRate(_discountedRate, msg.sender);
@@ -321,7 +322,6 @@ contract LiquidVault is Ownable {
             uint _discountedRate = 50;          // 50% is assigned as the discounted-rate
             setDiscountedRate(_discountedRate, msg.sender);
         }
-
     }
 
     function lockedLPLength(address holder) public view returns (uint) {
