@@ -68,6 +68,13 @@ contract("AutonomousDegenVCV2", function(accounts) {
     const liquidVaultShare = 80
     const burnPercentage = 10
 
+    function toWei(amount) {
+        return web3.utils.toWei(`${ amount }`, 'ether')
+    }
+
+    function fromWei(amount) {
+        return web3.utils.fromWei(`${ amount }`, 'ether')
+    }
 
     async function getEvents(contractInstance, eventName) {
         const _latestBlock = await time.latestBlock()
@@ -206,6 +213,7 @@ contract("AutonomousDegenVCV2", function(accounts) {
 
             let event = await getEvents(liquidVaultFactory, "LiquidVaultSeeded")
             LIQUID_VAULT = event._liquidVault
+            liquidValut = await LiquidVault.at(LIQUID_VAULT)
             console.log('\n=== LIQUID_VAULT (Seeded) ===', LIQUID_VAULT)
         })
 
@@ -216,6 +224,14 @@ contract("AutonomousDegenVCV2", function(accounts) {
             let event = await getEvents(feeDistributorFactory, "FeeDistributorSeeded")
             FEE_DISTRIBUTOR = event._feeDistributor
             console.log('\n=== FEE_DISTRIBUTOR (Seeded) ===', FEE_DISTRIBUTOR)
+        })
+
+        it("[Step 6]: Set a discounted-rate (10%)", async () => {
+            const discountedRate = 10  /// 10%
+            const caller = deployer;
+
+            let txReceipt = await liquidValut.setDiscountedRate(discountedRate, caller, { from: deployer })
+            //let txReceipt = await autonomousDegenVC.setDiscountedRate(LIQUID_VAULT, discountedRate, caller, { from: deployer })
         })
 
         it("[Step 7]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
@@ -229,11 +245,15 @@ contract("AutonomousDegenVCV2", function(accounts) {
         })
 
         it("[Step 4]: A user purchase LP tokens by sending 1 ETH", async () => {
-            const ethAmount = web3.utils.toWei('1', 'ether')  /// 1 ETH
+            /// [Note]: On the assumption that the exchange rate of "ProjectToken:ETH" is "1:1"
+            /// [Note]: Based on "ethFeeRequired", a sending ETH amount will be determined.
+            const purchaseAmountOfProjectToken = 1  /// 1 ProjectToken
+            const purchaseAmountOfETH = 1           /// 1 ETH
+            const totalPurchaseAmount = toWei(`${ purchaseAmountOfProjectToken + purchaseAmountOfETH }`)
+            let ethFeeRequired = await liquidValut.getEthFeeRequired(totalPurchaseAmount)
+            console.log('=== ethFeeRequired (unit: ETH) ===', fromWei(String(ethFeeRequired)))  /// [Result]: eg). 1.8 ETH
 
-            //liquidValut = await LiquidVault.at(LIQUID_VAULT)
-            //let txReceipt = await liquidValut.purchaseLP({ from: deployer, value: ethAmount })
-            let txReceipt = await autonomousDegenVC.purchaseLP(LIQUID_VAULT, { from: deployer, value: ethAmount })
+            let txReceipt = await autonomousDegenVC.purchaseLP(LIQUID_VAULT, { from: deployer, value: ethFeeRequired })
         })
 
         it("[Step 5]: After 1 weeks from purchase LP, a user claim LP tokens", async () => {
