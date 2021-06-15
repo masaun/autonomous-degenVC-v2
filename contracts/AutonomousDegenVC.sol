@@ -14,7 +14,7 @@ import { IUniswapV2Pair } from "./uniswap-v2/uniswap-v2-core/interfaces/IUniswap
 import { IWETH } from "./uniswap-v2/uniswap-v2-periphery/interfaces/IWETH.sol";
 
 /**
- * @notice - This is a smart contract that is automate process of Degen.VC
+ * @notice - This is a smart contract that automate process of Degen.VC
  *
  * ① A Uniswap market is created for the new project
  * ② Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP;
