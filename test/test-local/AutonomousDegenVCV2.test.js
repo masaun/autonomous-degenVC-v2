@@ -245,9 +245,12 @@ contract("AutonomousDegenVCV2", function(accounts) {
         })
 
         it("[Step 4]: A user purchase LP tokens by sending 1 ETH", async () => {
-            /// [Note]: Based on "ethFeeRequired", a sending ETH amount will be determined.            
-            const purchaseAmount = toWei(2)  /// 2 LPs
-            let ethFeeRequired = await liquidValut.getEthFeeRequired(purchaseAmount)
+            /// [Note]: On the assumption that the exchange rate of "ProjectToken:ETH" is "1:1"
+            /// [Note]: Based on "ethFeeRequired", a sending ETH amount will be determined.
+            const purchaseAmountOfProjectToken = 1  /// 1 ProjectToken
+            const purchaseAmountOfETH = 1           /// 1 ETH
+            const totalPurchaseAmount = toWei(`${ purchaseAmountOfProjectToken + purchaseAmountOfETH }`)
+            let ethFeeRequired = await liquidValut.getEthFeeRequired(totalPurchaseAmount)
             console.log('=== ethFeeRequired (unit: ETH) ===', fromWei(String(ethFeeRequired)))  /// [Result]: eg). 1.8 ETH
 
             let txReceipt = await autonomousDegenVC.purchaseLP(LIQUID_VAULT, { from: deployer, value: ethFeeRequired })
