@@ -180,7 +180,7 @@ contract("AutonomousDegenVCV2", function(accounts) {
             console.log('\n=== FEE_DISTRIBUTOR ===', FEE_DISTRIBUTOR)
         })
 
-        it("[Step 6]: A uniswap market is created for the new project", async () => {
+        it("[Step 4]: A uniswap market is created for the new project", async () => {
             const amountTokenDesired = web3.utils.toWei('10000', 'ether')    /// 10,000 TPT (ProjectTokens)
             const amountTokenMin = web3.utils.toWei('0', 'ether')  /// [Note]: When initial addLiquidity(), this is 0
             const amountETHMin = web3.utils.toWei('0', 'ether')    /// [Note]: When initial addLiquidity(), this is 0
@@ -199,7 +199,7 @@ contract("AutonomousDegenVCV2", function(accounts) {
             console.log('\n=== LP (ProjectToken-ETH pair) ===', LP)      
         })
 
-        it("[Step 4]: Inject Seed into a LiquidVault", async () => {
+        it("[Step 5]: Inject Seed into a LiquidVault", async () => {
             let txReceipt = await liquidVaultFactory.injectSeedIntoLiquidVault(LIQUID_VAULT, 
                                                                                stakeDuration, 
                                                                                PROJECT_TOKEN, 
@@ -217,7 +217,7 @@ contract("AutonomousDegenVCV2", function(accounts) {
             console.log('\n=== LIQUID_VAULT (Seeded) ===', LIQUID_VAULT)
         })
 
-        it("[Step 5]: Inject Seed into a FeeDistributor", async () => {
+        it("[Step 6]: Inject Seed into a FeeDistributor", async () => {
             const secondaryAddress = feeReceiver
             let txReceipt = await feeDistributorFactory.injectSeedIntoFeeDistributor(FEE_DISTRIBUTOR, PROJECT_TOKEN, LIQUID_VAULT, secondaryAddress, liquidVaultShare, burnPercentage, { from: deployer })
 
@@ -226,7 +226,7 @@ contract("AutonomousDegenVCV2", function(accounts) {
             console.log('\n=== FEE_DISTRIBUTOR (Seeded) ===', FEE_DISTRIBUTOR)
         })
 
-        it("[Step 6]: Set a discounted-rate (10%)", async () => {
+        it("[Step 7]: Set a discounted-rate (10%)", async () => {
             const discountedRate = 10  /// 10%
             const caller = deployer;
 
@@ -234,7 +234,7 @@ contract("AutonomousDegenVCV2", function(accounts) {
             //let txReceipt = await autonomousDegenVC.setDiscountedRate(LIQUID_VAULT, discountedRate, caller, { from: deployer })
         })
 
-        it("[Step 7]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
+        it("[Step 8]: A Liquid Vault is capitalized with project tokens to incentivise early liquidity", async () => {
             const capitalizedAmount = web3.utils.toWei('20000', 'ether')  // 20,000 Project Token that is topped up into the Liquid Vault
 
             const projectTokenBalance = await projectToken.balanceOf(deployer)
@@ -244,19 +244,20 @@ contract("AutonomousDegenVCV2", function(accounts) {
             let txReceipt2 = await autonomousDegenVC.capitalizeWithProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, capitalizedAmount, { from: deployer })
         })
 
-        it("[Step 4]: A user purchase LP tokens by sending 1 ETH", async () => {
+        it("[Step 9]: A user purchase LP tokens by sending ETH fee required", async () => {
             /// [Note]: On the assumption that the exchange rate of "ProjectToken:ETH" is "1:1"
             /// [Note]: Based on "ethFeeRequired", a sending ETH amount will be determined.
             const purchaseAmountOfProjectToken = 1  /// 1 ProjectToken
             const purchaseAmountOfETH = 1           /// 1 ETH
             const totalPurchaseAmount = toWei(`${ purchaseAmountOfProjectToken + purchaseAmountOfETH }`)
             let ethFeeRequired = await liquidValut.getEthFeeRequired(totalPurchaseAmount)
-            console.log('=== ethFeeRequired (unit: ETH) ===', fromWei(String(ethFeeRequired)))  /// [Result]: eg). 1.8 ETH
+            console.log('=== ETH fee required (unit: ETH) ===', fromWei(String(ethFeeRequired)))  /// [Result]: eg). 1.8 ETH
 
-            let txReceipt = await autonomousDegenVC.purchaseLP(LIQUID_VAULT, { from: deployer, value: ethFeeRequired })
+            /// [Note]: msg.sender will send "ETH fee required"
+            let txReceipt = await autonomousDegenVC.purchaseLP(LIQUID_VAULT, totalPurchaseAmount, { from: deployer, value: ethFeeRequired })
         })
 
-        it("[Step 5]: After 1 weeks from purchase LP, a user claim LP tokens", async () => {
+        it("[Step 10]: After 1 weeks from purchase LP, a user claim LP tokens + receive some ProjectToken as rewards", async () => {
             /// [Note]: "block.timestamp - batch.timestamp" must be greater than "stakeDuration"
             /// [Note]: Increase time (to 1 week ahead)
             const duration = 60 * 60 * 24 * 7  /// 1 week

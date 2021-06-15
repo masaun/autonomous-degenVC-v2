@@ -106,8 +106,13 @@ contract AutonomousDegenVCV2 {
      *             (Then, LPs swapped will be locked in the LiquidVault)
      */
     function purchaseLP(
-        LiquidVault liquidVault
+        LiquidVault liquidVault,
+        uint totalPurchaseAmount
     ) payable public {
+        // @notice - Check whether "ETH fee sent" is equal to "ETH fee required"
+        uint ethFeeRequired = liquidVault.getEthFeeRequired(totalPurchaseAmount);
+        require(msg.value == ethFeeRequired, "LiquidVault: ETH fee sent should be equal to ETH fee required");
+
         // @notice - Send ETH from msg.sender
         // @notice - Swap ETH sent for LPs. (Then, LPs swapped will be locked in the LiquidVault)
         liquidVault.purchaseLP{ value: msg.value }();
