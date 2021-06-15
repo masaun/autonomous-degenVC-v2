@@ -21,7 +21,7 @@ import { IWETH } from "./uniswap-v2/uniswap-v2-periphery/interfaces/IWETH.sol";
  * ③ A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
  *
  */
-contract AutonomousDegenVCV2 {
+contract AutonomousDegenVC {
     using SafeMath for uint;
 
     //address[] public lpHolders;  /// UNI LP token (DGVC-ETH) holders address list
