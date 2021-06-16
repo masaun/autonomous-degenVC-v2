@@ -144,10 +144,10 @@ contract("AutonomousDegenVC", function(accounts) {
             const balance1 = await lpDgvcEth.balanceOf(user1)
             const balance2 = await lpDgvcEth.balanceOf(user2)
             const balance3 = await lpDgvcEth.balanceOf(user3)
-            console.log('\n=== UNI-V2 LP Tokens (DGVC-ETH pair): totalSupply ===', fromWei(String(_totalSupply)))
-            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user1 ===', fromWei(String(balance1)))
-            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user2 ===', fromWei(String(balance2)))
-            console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user3 ===', fromWei(String(balance3)))
+            // console.log('\n=== UNI-V2 LP Tokens (DGVC-ETH pair): totalSupply ===', fromWei(String(_totalSupply)))
+            // console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user1 ===', fromWei(String(balance1)))
+            // console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user2 ===', fromWei(String(balance2)))
+            // console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user3 ===', fromWei(String(balance3)))
         })
     })
 
@@ -245,7 +245,7 @@ contract("AutonomousDegenVC", function(accounts) {
             let txReceipt2 = await autonomousDegenVC.capitalizeWithProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, capitalizedAmount, { from: deployer })
         })
 
-        it("[Step 9]: A user1 purchase LP tokens by sending ETH fee required", async () => {
+        it("[Step 9]: User1 purchase LP tokens by sending ETH fee required", async () => {
             /// [Note]: On the assumption that the exchange rate of "ProjectToken:ETH" is "1:1"
             /// [Note]: Based on "ethFeeRequired", a sending ETH amount will be determined.
             const purchaseAmountOfProjectToken = 1  /// 1 ProjectToken
@@ -258,7 +258,7 @@ contract("AutonomousDegenVC", function(accounts) {
             let txReceipt = await liquidValut.purchaseLP(totalPurchaseAmount, { from: user1, value: ethFeeRequired })
         })
 
-        it("[Step 10]: After 1 weeks from purchase LP, a user claim LP tokens + receive some rewards (project tokens)", async () => {
+        it("[Step 10]: After 1 weeks from purchase LP, user1 claim LP tokens + receive some rewards (project tokens)", async () => {
             /// [Note]: "block.timestamp - batch.timestamp" must be greater than "stakeDuration"
             /// [Note]: Increase time (to 1 week ahead)
             const duration = 60 * 60 * 24 * 7  /// 1 week
@@ -271,7 +271,7 @@ contract("AutonomousDegenVC", function(accounts) {
     })
 
     describe("\n Check final result", () => {
-        it("LPs (ProjectToken-ETH pair) + Rewards (project tokens) should be distributed into all UNI-LP token (DGVC-ETH) holders", async () => {
+        it("User1 should has some amount of distributed LPs (ProjectToken-ETH pair) + Rewards (project tokens)", async () => {
             let lpBalance1 = await lp.balanceOf(user1)
             let lpBalance2 = await lp.balanceOf(user2)
             let lpBalance3 = await lp.balanceOf(user3)
