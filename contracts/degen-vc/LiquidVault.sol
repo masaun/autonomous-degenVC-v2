@@ -199,7 +199,11 @@ contract LiquidVault is Ownable {
     /**
      * @notice - Send ETH to mint LP tokens (ProjectToken - ETH pair) in LiquidVault
      */
-    function purchaseLP() public payable {
+    function purchaseLP(uint totalPurchaseAmount) public payable {
+        // @notice - Check whether "ETH fee sent" is equal to "ETH fee required"
+        uint ethFeeRequired = getEthFeeRequired(totalPurchaseAmount);
+        require(msg.value == ethFeeRequired, "LiquidVault: ETH fee sent should be equal to ETH fee required");
+
         purchaseLPFor(msg.sender);
     }
 

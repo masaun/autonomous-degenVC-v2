@@ -14,7 +14,7 @@ import { IUniswapV2Pair } from "./uniswap-v2/uniswap-v2-core/interfaces/IUniswap
 import { IWETH } from "./uniswap-v2/uniswap-v2-periphery/interfaces/IWETH.sol";
 
 /**
- * @notice - This is a smart contract that is automate process of Degen.VC
+ * @notice - This is a smart contract that automate process of Degen.VC
  *
  * ① A Uniswap market is created for the new project
  * ② Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP;
@@ -94,61 +94,10 @@ contract AutonomousDegenVC {
         projectToken.transfer(LIQUID_VAULT, capitalizedAmount);
     }
 
-    /**
-     * @notice - Set a discounted-rate (0% ~ 100%)
-     */
-    //function setDiscountedRate(LiquidVault liquidVault, uint discountedRate, address caller) public returns (bool) {
-    //    _setDiscountedRate(liquidVault, discountedRate, caller);
-    //}
-
-    /**
-     * @notice - ② A user send ETH into a Liquid Vault and swap ETH sent for LPs
-     *             (Then, LPs swapped will be locked in the LiquidVault)
-     */
-    function purchaseLP(
-        LiquidVault liquidVault,
-        uint totalPurchaseAmount
-    ) payable public {
-        // @notice - Check whether "ETH fee sent" is equal to "ETH fee required"
-        uint ethFeeRequired = liquidVault.getEthFeeRequired(totalPurchaseAmount);
-        require(msg.value == ethFeeRequired, "LiquidVault: ETH fee sent should be equal to ETH fee required");
-
-        // @notice - Send ETH from msg.sender
-        // @notice - Swap ETH sent for LPs. (Then, LPs swapped will be locked in the LiquidVault)
-        liquidVault.purchaseLP{ value: msg.value }();
-        //_purchaseLP{ value: msg.value }(liquidVault);
-    } 
-
-    /**
-     * @notice - ③ A user claim LP.
-     */
-    function claimLP(LiquidVault liquidVault, IProjectToken projectToken) public {
-        address LIQUID_VAULT = address(liquidVault);
-
-        // Claim LPs (ProjectToken-ETH pair) in the LiquidVault
-        _claimLP(liquidVault);
-    }
-
-
-
+ 
     //----------------------------------------------
     // Inherited-methods from the LiquidVault.sol
     //----------------------------------------------
-
-    // @notice - Claim LPs (ProjectToken-ETH pair) in the LiquidVault
-    function _claimLP(LiquidVault liquidVault) internal returns (bool) {
-        liquidVault.claimLP(); 
-    }
-
-    // @notice - Send ETH to match with the ProjectTokens in LiquidVault
-    //function _purchaseLP(LiquidVault liquidVault) internal returns (bool) {
-    //    liquidVault.purchaseLP{ value: msg.value }();
-    //}
-
-    // @notice - Set a discounted-rate (0% ~ 100%)
-    //function _setDiscountedRate(LiquidVault liquidVault, uint discountedRate, address caller) internal returns (bool) {
-    //    liquidVault.setDiscountedRate(discountedRate, caller);
-    //}
 
     // @notice - Get a locked-LP 
     function getLockedLP(LiquidVault liquidVault, address holder_, uint position) 
@@ -165,6 +114,7 @@ contract AutonomousDegenVC {
         return (holder, amount, timestamp, claimed);
     }
 
+    // @notice - Get a LP pair address    
     function getPair(address token0, address token1) public view returns (address pair) {
         return uniswapV2Factory.getPair(token0, token1);
     }
