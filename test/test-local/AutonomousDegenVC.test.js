@@ -3,7 +3,7 @@ const Web3 = require('web3');
 const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8545'))
 
 /// Openzeppelin test-helper
-const { time } = require('@openzeppelin/test-helpers')
+const { time, expectRevert } = require('@openzeppelin/test-helpers')
 
 /// Import deployed-addresses
 const contractAddressList = require("../../migrations/addressesList/contractAddress/contractAddress.js")
@@ -185,16 +185,16 @@ contract("AutonomousDegenVC", function(accounts) {
 
         it("[Step 4]: A uniswap market is created for the new project", async () => {
             const amountTokenDesired = toWei('10000')    /// 10,000 TPT (ProjectTokens)
-            const amountTokenMin = toWei('0')  /// [Note]: When initial addLiquidity(), this is 0
-            const amountETHMin = toWei('0')    /// [Note]: When initial addLiquidity(), this is 0
-            const to = deployer  /// [Note]: your address, because you're the one who gets the fees later
-            const deadline = Date.now() + 3000   /// Now + 3000 seconds
-            console.log('\n=== deadline ===', deadline)  /// e.g). 1620193601002
+            const amountTokenMin = toWei('0')            /// [Note]: When initial addLiquidity(), this is 0
+            const amountETHMin = toWei('0')              /// [Note]: When initial addLiquidity(), this is 0
+            const to = deployer                          /// [Note]: Receiver address
+            const deadline = Date.now() + 3000           /// Now + 3000 seconds
+            //console.log('\n=== deadline ===', deadline)  /// e.g). 1620193601002
 
-            const initialLiquidityEthAmount = toWei('10')  /// 10 ETH
+            const ethAmountForInitialLiquidity = toWei('10')  /// 10 ETH
 
             let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, amountTokenDesired, { from: deployer })
-            let txReceipt2 = await autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline, { from: deployer, value: initialLiquidityEthAmount })  
+            let txReceipt2 = await autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline, { from: deployer, value: ethAmountForInitialLiquidity })  
         })
 
         it("Create the LP token (ProjectToken-ETH pair) instance", async () => {
@@ -242,7 +242,7 @@ contract("AutonomousDegenVC", function(accounts) {
             const capitalizedAmount = toWei('20000')  // 20,000 Project Token that is topped up into the Liquid Vault
 
             const projectTokenBalance = await projectToken.balanceOf(deployer)
-            console.log('\n=== projectTokenBalance (of deployer) ===', String(projectTokenBalance))
+            console.log('\n=== ProjectToken balance (of deployer) ===', fromWei(String(projectTokenBalance)))
 
             let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, capitalizedAmount, { from: deployer })
             let txReceipt2 = await autonomousDegenVC.capitalizeWithProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, capitalizedAmount, { from: deployer })
@@ -261,7 +261,14 @@ contract("AutonomousDegenVC", function(accounts) {
             let txReceipt = await liquidValut.purchaseLP(totalPurchaseAmount, { from: user1, value: ethFeeRequired })
         })
 
-        it("[Step 10]: After 1 weeks from purchase LP, user1 claim LP tokens + receive some rewards (project tokens)", async () => {
+        it('[Step 10]: Should revert to claim LP if user1 claim within the minimum staking period (24 hours)', async () => {
+            await expectRevert(
+                liquidValut.claimLP({ from: user1 }),
+                "LiquidVault: staked-period has not passed the minimum locked-period yet"
+            )
+        })
+
+        it("[Step 10]: Should be successful to claim LP if user1 claim LP after 1 weeks => As a result, user1 should receive LP tokens (50% discounted) + some rewards (project tokens)", async () => {
             /// [Note]: "block.timestamp - batch.timestamp" must be greater than "stakeDuration"
             /// [Note]: Increase time (to 1 week ahead)
             const duration = 60 * 60 * 24 * 7  /// 1 week
@@ -292,7 +299,7 @@ contract("AutonomousDegenVC", function(accounts) {
 
         it("Remained-ProjectTokens should be transferred into the LiquidVault", async () => {
             let projectTokenBalance = await projectToken.balanceOf(LIQUID_VAULT)
-            console.log('\n=== projectTokenBalance (of the LiquidVault) ===', fromWei(String(projectTokenBalance)))
+            console.log('\n=== ProjectToken balance (of the LiquidVault) ===', fromWei(String(projectTokenBalance)))
         })
     })
 
