@@ -256,7 +256,7 @@ contract("AutonomousDegenVC", function(accounts) {
             console.log('=== ETH fee required (unit: ETH) ===', fromWei(String(ethFeeRequired)))  /// [Result]: eg). 1.8 ETH
 
             /// [Note]: msg.sender will send "ETH fee required"
-            let txReceipt = await liquidValut.purchaseLP({ from: user1, value: ethFeeRequired })
+            let txReceipt = await liquidValut.purchaseLP(totalPurchaseAmount, { from: user1, value: ethFeeRequired })
             //let txReceipt = await autonomousDegenVC.purchaseLP(LIQUID_VAULT, totalPurchaseAmount, { from: user1, value: ethFeeRequired })
         })
 

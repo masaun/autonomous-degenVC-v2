@@ -115,8 +115,7 @@ contract AutonomousDegenVC {
 
         // @notice - Send ETH from msg.sender
         // @notice - Swap ETH sent for LPs. (Then, LPs swapped will be locked in the LiquidVault)
-        liquidVault.purchaseLP{ value: msg.value }();
-        //_purchaseLP{ value: msg.value }(liquidVault);
+        liquidVault.purchaseLP{ value: msg.value }(totalPurchaseAmount);
     } 
 
     /**
@@ -127,11 +126,6 @@ contract AutonomousDegenVC {
 
         // Claim LPs (ProjectToken-ETH pair) in the LiquidVault
         _claimLP(liquidVault);
-
-        // Transfer LPs and rewards into a user (msg.sender) who is claimed
-        // address PROJECT_TOKEN = address(projectToken);
-        // address LP = getPair(PROJECT_TOKEN, WETH)
-        // IUniswapV2Pair(LP).transfer(msg.sender, );
     }
 
 
