@@ -256,7 +256,8 @@ contract("AutonomousDegenVC", function(accounts) {
             console.log('=== ETH fee required (unit: ETH) ===', fromWei(String(ethFeeRequired)))  /// [Result]: eg). 1.8 ETH
 
             /// [Note]: msg.sender will send "ETH fee required"
-            let txReceipt = await autonomousDegenVC.purchaseLP(LIQUID_VAULT, totalPurchaseAmount, { from: user1, value: ethFeeRequired })
+            let txReceipt = await liquidValut.purchaseLP({ from: user1, value: ethFeeRequired })
+            //let txReceipt = await autonomousDegenVC.purchaseLP(LIQUID_VAULT, totalPurchaseAmount, { from: user1, value: ethFeeRequired })
         })
 
         it("[Step 10]: After 1 weeks from purchase LP, a user claim LP tokens + receive some rewards (project tokens)", async () => {
@@ -266,7 +267,8 @@ contract("AutonomousDegenVC", function(accounts) {
             await time.increase(duration)
 
             /// Claim LP
-            let txReceipt = await autonomousDegenVC.claimLP(LIQUID_VAULT, PROJECT_TOKEN, { from: user1 })
+            let txReceipt = await liquidValut.claimLP({ from: user1 })
+            //let txReceipt = await autonomousDegenVC.claimLP(LIQUID_VAULT, PROJECT_TOKEN, { from: user1 })
         })
 
     })

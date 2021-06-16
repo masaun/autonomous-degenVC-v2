@@ -127,6 +127,11 @@ contract AutonomousDegenVC {
 
         // Claim LPs (ProjectToken-ETH pair) in the LiquidVault
         _claimLP(liquidVault);
+
+        // Transfer LPs and rewards into a user (msg.sender) who is claimed
+        // address PROJECT_TOKEN = address(projectToken);
+        // address LP = getPair(PROJECT_TOKEN, WETH)
+        // IUniswapV2Pair(LP).transfer(msg.sender, );
     }
 
 
