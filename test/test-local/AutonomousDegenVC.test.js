@@ -272,23 +272,19 @@ contract("AutonomousDegenVC", function(accounts) {
 
     describe("\n Check final result", () => {
         it("LPs (ProjectToken-ETH pair) + Rewards (project tokens) should be distributed into all UNI-LP token (DGVC-ETH) holders", async () => {
-            const lpHolder1 = user1
-            const lpHolder2 = user2
-            const lpHolder3 = user3
+            let lpBalance1 = await lp.balanceOf(user1)
+            let lpBalance2 = await lp.balanceOf(user2)
+            let lpBalance3 = await lp.balanceOf(user3)
+            console.log('\n=== LP token (ProjectToken-ETH pair) balance of user1 ===', fromWei(String(lpBalance1)))
+            console.log('=== LP token (ProjectToken-ETH pair) balance of user2 ===', fromWei(String(lpBalance2)))
+            console.log('=== LP token (ProjectToken-ETH pair) balance of user3 ===', fromWei(String(lpBalance3)))
 
-            let lpBalance1 = await lp.balanceOf(lpHolder1)
-            let lpBalance2 = await lp.balanceOf(lpHolder2)
-            let lpBalance3 = await lp.balanceOf(lpHolder3)
-            console.log('\n=== LP token (ProjectToken-ETH pair) balance of Holder1 ===', fromWei(String(lpBalance1)))
-            console.log('=== LP token (ProjectToken-ETH pair) balance of Holder2 ===', fromWei(String(lpBalance2)))
-            console.log('=== LP token (ProjectToken-ETH pair) balance of Holder3 ===', fromWei(String(lpBalance3)))
-
-            let projectTokenBalance1 = await projectToken.balanceOf(lpHolder1)
-            let projectTokenBalance2 = await projectToken.balanceOf(lpHolder2)
-            let projectTokenBalance3 = await projectToken.balanceOf(lpHolder3)                        
-            console.log('=== ProjectToken (Rewards) balance of Holder1 ===', fromWei(String(projectTokenBalance1)))
-            console.log('=== ProjectToken (Rewards) balance of Holder2 ===', fromWei(String(projectTokenBalance2)))
-            console.log('=== ProjectToken (Rewards) balance of Holder3 ===', fromWei(String(projectTokenBalance3)))
+            let projectTokenBalance1 = await projectToken.balanceOf(user1)
+            let projectTokenBalance2 = await projectToken.balanceOf(user2)
+            let projectTokenBalance3 = await projectToken.balanceOf(user3)                        
+            console.log('=== ProjectToken (Rewards) balance of user1 ===', fromWei(String(projectTokenBalance1)))
+            console.log('=== ProjectToken (Rewards) balance of user2 ===', fromWei(String(projectTokenBalance2)))
+            console.log('=== ProjectToken (Rewards) balance of user3 ===', fromWei(String(projectTokenBalance3)))
         })  
 
         it("Remained-ProjectTokens should be transferred into the LiquidVault", async () => {
