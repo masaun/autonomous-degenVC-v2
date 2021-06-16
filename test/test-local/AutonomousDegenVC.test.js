@@ -97,15 +97,15 @@ contract("AutonomousDegenVC", function(accounts) {
             LP_DGVC_ETH = lpDgvcEth.address
         })
 
-        it("Transfer the UNI-V2 LP Tokens (DGVC-ETH pair) into 3 users in order to set up LP token holders", async () => {
-            const amount1 = toWei("1000")
-            const amount2 = toWei("2000")
-            const amount3 = toWei("3000")
+        // it("Transfer the UNI-V2 LP Tokens (DGVC-ETH pair) into 3 users in order to set up LP token holders", async () => {
+        //     const amount1 = toWei("1000")
+        //     const amount2 = toWei("2000")
+        //     const amount3 = toWei("3000")
 
-            let txReceipt1 = await lpDgvcEth.transfer(user1, amount1, { from: deployer })
-            let txReceipt2 = await lpDgvcEth.transfer(user2, amount2, { from: deployer })
-            let txReceipt3 = await lpDgvcEth.transfer(user3, amount3, { from: deployer })
-        })
+        //     let txReceipt1 = await lpDgvcEth.transfer(user1, amount1, { from: deployer })
+        //     let txReceipt2 = await lpDgvcEth.transfer(user2, amount2, { from: deployer })
+        //     let txReceipt3 = await lpDgvcEth.transfer(user3, amount3, { from: deployer })
+        // })
 
         it("Deploy the LiquidVaultFactory contract instance", async () => {
             liquidVaultFactory = await LiquidVaultFactory.new({ from: deployer })
@@ -139,16 +139,16 @@ contract("AutonomousDegenVC", function(accounts) {
             console.log('=== UNISWAP_V2_FACTORY ===', UNISWAP_V2_FACTORY)
         })
 
-        it("[Log]: the UNI-V2 LP Token (DGVC-ETH pair) balance of 3 users", async () => {
-            const _totalSupply = await lpDgvcEth.totalSupply()
-            const balance1 = await lpDgvcEth.balanceOf(user1)
-            const balance2 = await lpDgvcEth.balanceOf(user2)
-            const balance3 = await lpDgvcEth.balanceOf(user3)
-            // console.log('\n=== UNI-V2 LP Tokens (DGVC-ETH pair): totalSupply ===', fromWei(String(_totalSupply)))
-            // console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user1 ===', fromWei(String(balance1)))
-            // console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user2 ===', fromWei(String(balance2)))
-            // console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user3 ===', fromWei(String(balance3)))
-        })
+        // it("[Log]: the UNI-V2 LP Token (DGVC-ETH pair) balance of 3 users", async () => {
+        //     const _totalSupply = await lpDgvcEth.totalSupply()
+        //     const balance1 = await lpDgvcEth.balanceOf(user1)
+        //     const balance2 = await lpDgvcEth.balanceOf(user2)
+        //     const balance3 = await lpDgvcEth.balanceOf(user3)
+        //     console.log('\n=== UNI-V2 LP Tokens (DGVC-ETH pair): totalSupply ===', fromWei(String(_totalSupply)))
+        //     console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user1 ===', fromWei(String(balance1)))
+        //     console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user2 ===', fromWei(String(balance2)))
+        //     console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user3 ===', fromWei(String(balance3)))
+        // })
     })
 
     describe("\n Workflow of the AutonomousDegenVC contract", () => {
