@@ -233,7 +233,6 @@ contract("AutonomousDegenVC", function(accounts) {
             const caller = deployer;
 
             let txReceipt = await liquidValut.setDiscountedRate(discountedRate, caller, { from: deployer })
-            //let txReceipt = await autonomousDegenVC.setDiscountedRate(LIQUID_VAULT, discountedRate, caller, { from: deployer })
         })
 
         it("[Step 8]: A Liquid Vault is capitalized with (topped up with) project tokens", async () => {
@@ -257,7 +256,6 @@ contract("AutonomousDegenVC", function(accounts) {
 
             /// [Note]: msg.sender will send "ETH fee required"
             let txReceipt = await liquidValut.purchaseLP(totalPurchaseAmount, { from: user1, value: ethFeeRequired })
-            //let txReceipt = await autonomousDegenVC.purchaseLP(LIQUID_VAULT, totalPurchaseAmount, { from: user1, value: ethFeeRequired })
         })
 
         it("[Step 10]: After 1 weeks from purchase LP, a user claim LP tokens + receive some rewards (project tokens)", async () => {
@@ -268,7 +266,6 @@ contract("AutonomousDegenVC", function(accounts) {
 
             /// Claim LP
             let txReceipt = await liquidValut.claimLP({ from: user1 })
-            //let txReceipt = await autonomousDegenVC.claimLP(LIQUID_VAULT, PROJECT_TOKEN, { from: user1 })
         })
 
     })
