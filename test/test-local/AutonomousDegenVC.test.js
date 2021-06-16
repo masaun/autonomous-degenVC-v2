@@ -17,6 +17,7 @@ const ProjectTokenFactory = artifacts.require("ProjectTokenFactory")
 const LiquidVault = artifacts.require("LiquidVault")
 const ProjectToken = artifacts.require("ProjectToken")
 const MockLpToken = artifacts.require("MockLpToken")
+const FeeDistributor = artifacts.require("FeeDistributor")
 const IUniswapV2Pair = artifacts.require("IUniswapV2Pair")
 const IUniswapV2Factory = artifacts.require("IUniswapV2Factory")
 
@@ -97,15 +98,15 @@ contract("AutonomousDegenVC", function(accounts) {
             LP_DGVC_ETH = lpDgvcEth.address
         })
 
-        it("Transfer the UNI-V2 LP Tokens (DGVC-ETH pair) into 3 users in order to set up LP token holders", async () => {
-            const amount1 = toWei("1000")
-            const amount2 = toWei("2000")
-            const amount3 = toWei("3000")
+        // it("Transfer the UNI-V2 LP Tokens (DGVC-ETH pair) into 3 users in order to set up LP token holders", async () => {
+        //     const amount1 = toWei("1000")
+        //     const amount2 = toWei("2000")
+        //     const amount3 = toWei("3000")
 
-            let txReceipt1 = await lpDgvcEth.transfer(user1, amount1, { from: deployer })
-            let txReceipt2 = await lpDgvcEth.transfer(user2, amount2, { from: deployer })
-            let txReceipt3 = await lpDgvcEth.transfer(user3, amount3, { from: deployer })
-        })
+        //     let txReceipt1 = await lpDgvcEth.transfer(user1, amount1, { from: deployer })
+        //     let txReceipt2 = await lpDgvcEth.transfer(user2, amount2, { from: deployer })
+        //     let txReceipt3 = await lpDgvcEth.transfer(user3, amount3, { from: deployer })
+        // })
 
         it("Deploy the LiquidVaultFactory contract instance", async () => {
             liquidVaultFactory = await LiquidVaultFactory.new({ from: deployer })
@@ -139,16 +140,16 @@ contract("AutonomousDegenVC", function(accounts) {
             console.log('=== UNISWAP_V2_FACTORY ===', UNISWAP_V2_FACTORY)
         })
 
-        it("[Log]: the UNI-V2 LP Token (DGVC-ETH pair) balance of 3 users", async () => {
-            const _totalSupply = await lpDgvcEth.totalSupply()
-            const balance1 = await lpDgvcEth.balanceOf(user1)
-            const balance2 = await lpDgvcEth.balanceOf(user2)
-            const balance3 = await lpDgvcEth.balanceOf(user3)
-            // console.log('\n=== UNI-V2 LP Tokens (DGVC-ETH pair): totalSupply ===', fromWei(String(_totalSupply)))
-            // console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user1 ===', fromWei(String(balance1)))
-            // console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user2 ===', fromWei(String(balance2)))
-            // console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user3 ===', fromWei(String(balance3)))
-        })
+        // it("[Log]: the UNI-V2 LP Token (DGVC-ETH pair) balance of 3 users", async () => {
+        //     const _totalSupply = await lpDgvcEth.totalSupply()
+        //     const balance1 = await lpDgvcEth.balanceOf(user1)
+        //     const balance2 = await lpDgvcEth.balanceOf(user2)
+        //     const balance3 = await lpDgvcEth.balanceOf(user3)
+        //     console.log('\n=== UNI-V2 LP Tokens (DGVC-ETH pair): totalSupply ===', fromWei(String(_totalSupply)))
+        //     console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user1 ===', fromWei(String(balance1)))
+        //     console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user2 ===', fromWei(String(balance2)))
+        //     console.log('=== UNI-V2 LP Tokens (DGVC-ETH pair): balance of user3 ===', fromWei(String(balance3)))
+        // })
     })
 
     describe("\n Workflow of the AutonomousDegenVC contract", () => {
@@ -169,6 +170,7 @@ contract("AutonomousDegenVC", function(accounts) {
 
             let event = await getEvents(liquidVaultFactory, "LiquidVaultCreated")
             LIQUID_VAULT = event._liquidVault
+            liquidValut = await LiquidVault.at(LIQUID_VAULT)
             console.log('\n=== LIQUID_VAULT ===', LIQUID_VAULT)
         })
 
@@ -177,6 +179,7 @@ contract("AutonomousDegenVC", function(accounts) {
 
             let event = await getEvents(feeDistributorFactory, "FeeDistributorCreated")
             FEE_DISTRIBUTOR = event._feeDistributor
+            feeDistributor = await FeeDistributor.at(FEE_DISTRIBUTOR)
             console.log('\n=== FEE_DISTRIBUTOR ===', FEE_DISTRIBUTOR)
         })
 
@@ -201,7 +204,7 @@ contract("AutonomousDegenVC", function(accounts) {
             lp = await IUniswapV2Pair.at(LP)
         })
 
-        it("[Step 5]: Inject Seed into a LiquidVault", async () => {
+        it("[Step 5]: Inject 'Seed' into a LiquidVault", async () => {
             let txReceipt = await liquidVaultFactory.injectSeedIntoLiquidVault(LIQUID_VAULT, 
                                                                                stakeDuration, 
                                                                                PROJECT_TOKEN, 
@@ -214,18 +217,18 @@ contract("AutonomousDegenVC", function(accounts) {
                                                                                { from: deployer })
 
             let event = await getEvents(liquidVaultFactory, "LiquidVaultSeeded")
-            LIQUID_VAULT = event._liquidVault
-            liquidValut = await LiquidVault.at(LIQUID_VAULT)
-            console.log('\n=== LIQUID_VAULT (Seeded) ===', LIQUID_VAULT)
+            // LIQUID_VAULT = event._liquidVault
+            // liquidValut = await LiquidVault.at(LIQUID_VAULT)
+            // console.log('\n=== LIQUID_VAULT (Seeded) ===', LIQUID_VAULT)
         })
 
-        it("[Step 6]: Inject Seed into a FeeDistributor", async () => {
+        it("[Step 6]: Inject 'Seed' into a FeeDistributor", async () => {
             const secondaryAddress = feeReceiver
             let txReceipt = await feeDistributorFactory.injectSeedIntoFeeDistributor(FEE_DISTRIBUTOR, PROJECT_TOKEN, LIQUID_VAULT, secondaryAddress, liquidVaultShare, burnPercentage, { from: deployer })
 
             let event = await getEvents(feeDistributorFactory, "FeeDistributorSeeded")
-            FEE_DISTRIBUTOR = event._feeDistributor
-            console.log('\n=== FEE_DISTRIBUTOR (Seeded) ===', FEE_DISTRIBUTOR)
+            // FEE_DISTRIBUTOR = event._feeDistributor
+            // console.log('\n=== FEE_DISTRIBUTOR (Seeded) ===', FEE_DISTRIBUTOR)
         })
 
         it("[Step 7]: Set a discounted-rate (10%)", async () => {
@@ -239,7 +242,7 @@ contract("AutonomousDegenVC", function(accounts) {
             const capitalizedAmount = toWei('20000')  // 20,000 Project Token that is topped up into the Liquid Vault
 
             const projectTokenBalance = await projectToken.balanceOf(deployer)
-            console.log('=== projectTokenBalance (of deployer) ===', String(projectTokenBalance))
+            console.log('\n=== projectTokenBalance (of deployer) ===', String(projectTokenBalance))
 
             let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, capitalizedAmount, { from: deployer })
             let txReceipt2 = await autonomousDegenVC.capitalizeWithProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, capitalizedAmount, { from: deployer })
@@ -252,7 +255,7 @@ contract("AutonomousDegenVC", function(accounts) {
             const purchaseAmountOfETH = 1           /// 1 ETH
             const totalPurchaseAmount = toWei(`${ purchaseAmountOfProjectToken + purchaseAmountOfETH }`)
             let ethFeeRequired = await liquidValut.getEthFeeRequired(totalPurchaseAmount)
-            console.log('=== ETH fee required (unit: ETH) ===', fromWei(String(ethFeeRequired)))  /// [Result]: eg). 1.8 ETH
+            console.log('\n=== ETH fee required (unit: ETH) ===', fromWei(String(ethFeeRequired)))  /// [Result]: eg). 1.8 ETH
 
             /// [Note]: msg.sender will send "ETH fee required"
             let txReceipt = await liquidValut.purchaseLP(totalPurchaseAmount, { from: user1, value: ethFeeRequired })
@@ -282,9 +285,9 @@ contract("AutonomousDegenVC", function(accounts) {
             let projectTokenBalance1 = await projectToken.balanceOf(user1)
             let projectTokenBalance2 = await projectToken.balanceOf(user2)
             let projectTokenBalance3 = await projectToken.balanceOf(user3)                        
-            console.log('=== ProjectToken (Rewards) balance of user1 ===', fromWei(String(projectTokenBalance1)))
-            console.log('=== ProjectToken (Rewards) balance of user2 ===', fromWei(String(projectTokenBalance2)))
-            console.log('=== ProjectToken (Rewards) balance of user3 ===', fromWei(String(projectTokenBalance3)))
+            console.log('=== Rewards (ProjectToken) balance of user1 ===', fromWei(String(projectTokenBalance1)))
+            console.log('=== Rewards (ProjectToken) balance of user2 ===', fromWei(String(projectTokenBalance2)))
+            console.log('=== Rewards (ProjectToken) balance of user3 ===', fromWei(String(projectTokenBalance3)))
         })  
 
         it("Remained-ProjectTokens should be transferred into the LiquidVault", async () => {
