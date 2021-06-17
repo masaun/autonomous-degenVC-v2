@@ -62,13 +62,6 @@ contract("AutonomousDegenVC", function(accounts) {
     let LP              /// UniswapV2Pair (ProjectToken-ETH pair)
     let LP_DGVC_ETH     /// UniswapV2Pair (DGVC-ETH pair)
 
-    /// Global variables (for injecting "seed" of the LiquidVault and the FeeDistributor contracts)
-    const stakeDuration = 1
-    const donationShare = 10
-    const purchaseFee = 30
-    const liquidVaultShare = 80
-    const burnPercentage = 10
-
     function toWei(amount) {
         return web3.utils.toWei(`${ amount }`, 'ether')
     }
@@ -205,6 +198,10 @@ contract("AutonomousDegenVC", function(accounts) {
         })
 
         it("[Step 5]: Inject 'Seed' into a LiquidVault", async () => {
+            const stakeDuration = 7   /// 7 days (60 * 60 * 24 * 7 seconds) as the lock period
+            const donationShare = 10  /// 0~100%: LP token
+            const purchaseFee = 30    /// 0~100%: ETH
+
             let txReceipt = await liquidVaultFactory.injectSeedIntoLiquidVault(LIQUID_VAULT, 
                                                                                stakeDuration, 
                                                                                PROJECT_TOKEN, 
@@ -224,7 +221,16 @@ contract("AutonomousDegenVC", function(accounts) {
 
         it("[Step 6]: Inject 'Seed' into a FeeDistributor", async () => {
             const secondaryAddress = feeReceiver
-            let txReceipt = await feeDistributorFactory.injectSeedIntoFeeDistributor(FEE_DISTRIBUTOR, PROJECT_TOKEN, LIQUID_VAULT, secondaryAddress, liquidVaultShare, burnPercentage, { from: deployer })
+            const liquidVaultShare = 80
+            const burnPercentage = 10
+
+            let txReceipt = await feeDistributorFactory.injectSeedIntoFeeDistributor(FEE_DISTRIBUTOR, 
+                                                                                     PROJECT_TOKEN, 
+                                                                                     LIQUID_VAULT, 
+                                                                                     secondaryAddress, 
+                                                                                     liquidVaultShare, 
+                                                                                     burnPercentage, 
+                                                                                     { from: deployer })
 
             let event = await getEvents(feeDistributorFactory, "FeeDistributorSeeded")
             // FEE_DISTRIBUTOR = event._feeDistributor
