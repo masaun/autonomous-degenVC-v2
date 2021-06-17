@@ -200,10 +200,6 @@ contract LiquidVault is Ownable {
      * @notice - Send ETH to mint LP tokens (ProjectToken - ETH pair) in LiquidVault
      */
     function purchaseLP(uint totalPurchaseAmount) public payable {
-        // @notice - Check whether "ETH fee sent" is equal to "ETH fee required"
-        uint ethFeeRequired = getEthFeeRequired(totalPurchaseAmount);
-        require(msg.value == ethFeeRequired, "LiquidVault: ETH fee sent should be equal to ETH fee required");
-
         purchaseLPFor(msg.sender);
     }
 
@@ -222,9 +218,6 @@ contract LiquidVault is Ownable {
     
         // Calculate staked-time (unit is "second")
         uint stakedSeconds = block.timestamp.sub(timestamp);  // [Note]: Total staked-time (Unit is "second")
-
-        // Check whether stakedPeriod of user has passed a minimum locked-period (1 day) or not
-        // [Todo]: Use stakeDuration
 
         // Distribute reward tokens into a user
         uint rewardAmount = REWARD_AMOUNT_PER_SECOND.mul(stakedSeconds);
@@ -274,22 +267,6 @@ contract LiquidVault is Ownable {
 
         // Claim project tokens as staking reward
         claimRewards();
-    }
-
-    /**
-     * @notice - get "ETH fee" required
-     *           (On the assumption that the exchange rate of "ProjectToken : ETH" is "1 token : 1 ETH")
-     *           e.g). In case of the discounted-rate is 50%, ETH fee required is 1.0 ETH
-     *           e.g). In case of the discounted-rate is 10%, ETH fee required is 1.8 ETH
-     * @param purchaseAmount - Purchase amount for LPs (=purchaseAmountOfProjectToken + purchaseAmountOfETH)
-     */
-    function getEthFeeRequired(uint purchaseAmount) public view returns (uint _ethFeeRequired) {
-        // [Todo]: Add a calculation of the discounted-rate (50% - The rate of ETH Fee)
-        uint discountedRate;
-        //uint discountedRate = getDiscountedRate();
-
-        uint ethFeeRequired = purchaseAmount.mul(ONE_HUNDRED_PERCENT.sub(discountedRate)).div(100);
-        return ethFeeRequired;
     }
 
     function lockedLPLength(address holder) public view returns (uint) {

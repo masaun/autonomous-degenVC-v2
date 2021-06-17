@@ -247,17 +247,9 @@ contract("AutonomousDegenVC", function(accounts) {
             let txReceipt2 = await autonomousDegenVC.capitalizeWithProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, capitalizedAmount, { from: deployer })
         })
 
-        it("[Step 9]: User1 purchase LP tokens by sending ETH fee required", async () => {
-            /// [Note]: On the assumption that the exchange rate of "ProjectToken:ETH" is "1:1"
-            /// [Note]: Based on "ethFeeRequired", a sending ETH amount will be determined.
-            const purchaseAmountOfProjectToken = 1  /// 1 ProjectToken
-            const purchaseAmountOfETH = 1           /// 1 ETH
-            const totalPurchaseAmount = toWei(`${ purchaseAmountOfProjectToken + purchaseAmountOfETH }`)
-            let ethFeeRequired = await liquidValut.getEthFeeRequired(totalPurchaseAmount)
-            console.log('\n=== ETH fee required (unit: ETH) ===', fromWei(String(ethFeeRequired)))  /// [Result]: eg). 1.8 ETH
-
-            /// [Note]: msg.sender will send "ETH fee required"
-            let txReceipt = await liquidValut.purchaseLP(totalPurchaseAmount, { from: user1, value: ethFeeRequired })
+        it("[Step 9]: User1 purchase LP tokens by sending 1 ETH", async () => {
+            const ethAmount = 1  /// 1 ETH
+            let txReceipt = await liquidValut.purchaseLP(totalPurchaseAmount, { from: user1, value: ethAmount })
         })
 
         it('[Step 10]: Should revert to claim LP if user1 claim within the lock period', async () => {
