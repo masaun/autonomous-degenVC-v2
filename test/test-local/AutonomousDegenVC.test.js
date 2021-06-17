@@ -290,7 +290,7 @@ contract("AutonomousDegenVC", function(accounts) {
         it("User2 and user3 should not has distributed-LPs (ProjectToken-ETH pair) + Rewards (project tokens)", async () => {
             let lpBalance2 = await lp.balanceOf(user2)
             let lpBalance3 = await lp.balanceOf(user3)
-            console.log('=== LP token (ProjectToken-ETH pair) balance of user2 ===', fromWei(String(lpBalance2)))
+            console.log('\n=== LP token (ProjectToken-ETH pair) balance of user2 ===', fromWei(String(lpBalance2)))
             console.log('=== LP token (ProjectToken-ETH pair) balance of user3 ===', fromWei(String(lpBalance3)))
 
             let projectTokenBalance2 = await projectToken.balanceOf(user2)

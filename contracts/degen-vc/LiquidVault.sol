@@ -13,11 +13,7 @@ import { IFeeDistributor } from "./IFeeDistributor.sol";
 contract LiquidVault is Ownable {
     using SafeMath for uint;
 
-    uint DISCOUNTED_RATE;                          // The discounted-rate that is set between 0 ~ 100 (%)
     uint REWARD_AMOUNT_PER_SECOND = 1 * 1e15;      // [Default]: 0.001 project token is distributed per second
-
-    uint constant MINIMUM_LOCKED_PERIOD = 1 days;  // 24 hour (60 * 60 * 24 seconds)
-    uint constant ONE_HUNDRED_PERCENT = 100;       // 100 (%)
 
     /** Emitted when purchaseLP() is called to track ETH amounts */
     event EthTransferred(
