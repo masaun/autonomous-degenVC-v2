@@ -206,8 +206,8 @@ contract("AutonomousDegenVC", function(accounts) {
 
         it("[Step 5]: Inject 'Seed' into a LiquidVault", async () => {
             const stakeDuration = 7   /// 7 days (60 * 60 * 24 * 7 seconds) as the lock period
-            const donationShare = 10  /// 0~100%: LP donation
-            const purchaseFee = 30    /// 0~100%: ETH Fee
+            const donationShare = 10  /// 0~100%: LP donation  (eg. In case of this, the rate of "LP donation" is defined as "10%")
+            const purchaseFee = 20    /// 0~100%: ETH Fee      (eg. In case of this, the rate of "ETH Fee" is defined as "20%")
 
             let txReceipt = await liquidVaultFactory.injectSeedIntoLiquidVault(LIQUID_VAULT, 
                                                                                stakeDuration, 
