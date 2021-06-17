@@ -181,13 +181,20 @@ contract("AutonomousDegenVC", function(accounts) {
             const amountTokenMin = toWei('0')            /// [Note]: When initial addLiquidity(), this is 0
             const amountETHMin = toWei('0')              /// [Note]: When initial addLiquidity(), this is 0
             const to = deployer                          /// [Note]: Receiver address
-            const deadline = Date.now() + 3000           /// Now + 3000 seconds
-            //console.log('\n=== deadline ===', deadline)  /// e.g). 1620193601002
-
+            const deadline = Date.now() + 3000           /// Now + 3000 seconds -> e.g). 1620193601002
             const ethAmountForInitialLiquidity = toWei('10')  /// 10 ETH
 
             let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, amountTokenDesired, { from: deployer })
-            let txReceipt2 = await autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline, { from: deployer, value: ethAmountForInitialLiquidity })  
+            let txReceipt2 = await autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, 
+                                                                                   amountTokenDesired, 
+                                                                                   amountTokenMin, 
+                                                                                   amountETHMin, 
+                                                                                   to, 
+                                                                                   deadline, 
+                                                                                   { 
+                                                                                       from: deployer, 
+                                                                                       value: ethAmountForInitialLiquidity 
+                                                                                   })  
         })
 
         it("Create the LP token (ProjectToken-ETH pair) instance", async () => {
@@ -199,8 +206,8 @@ contract("AutonomousDegenVC", function(accounts) {
 
         it("[Step 5]: Inject 'Seed' into a LiquidVault", async () => {
             const stakeDuration = 7   /// 7 days (60 * 60 * 24 * 7 seconds) as the lock period
-            const donationShare = 10  /// 0~100%: LP token
-            const purchaseFee = 30    /// 0~100%: ETH
+            const donationShare = 10  /// 0~100%: LP donation
+            const purchaseFee = 30    /// 0~100%: ETH Fee
 
             let txReceipt = await liquidVaultFactory.injectSeedIntoLiquidVault(LIQUID_VAULT, 
                                                                                stakeDuration, 
