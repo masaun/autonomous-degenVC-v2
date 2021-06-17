@@ -238,7 +238,7 @@ contract("AutonomousDegenVC", function(accounts) {
         })
 
         it("[Step 8]: A Liquid Vault is capitalized with (topped up with) project tokens", async () => {
-            const capitalizedAmount = toWei('20000')  // 20,000 Project Token that is topped up into the Liquid Vault
+            const capitalizedAmount = toWei('20000')  // 20,000 ProjectTokens that will be topped up into the Liquid Vault
 
             const projectTokenBalance = await projectToken.balanceOf(deployer)
             console.log('\n=== ProjectToken balance (of deployer) ===', fromWei(String(projectTokenBalance)))
@@ -260,10 +260,10 @@ contract("AutonomousDegenVC", function(accounts) {
             let txReceipt = await liquidValut.purchaseLP(totalPurchaseAmount, { from: user1, value: ethFeeRequired })
         })
 
-        it('[Step 10]: Should revert to claim LP if user1 claim within the minimum staking period (24 hours)', async () => {
+        it('[Step 10]: Should revert to claim LP if user1 claim within the lock period', async () => {
             await expectRevert(
                 liquidValut.claimLP({ from: user1 }),
-                "LiquidVault: staked-period has not passed the minimum locked-period yet"
+                "LiquidVault: LP still locked."
             )
         })
 
