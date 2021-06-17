@@ -62,13 +62,6 @@ contract("AutonomousDegenVC", function(accounts) {
     let LP              /// UniswapV2Pair (ProjectToken-ETH pair)
     let LP_DGVC_ETH     /// UniswapV2Pair (DGVC-ETH pair)
 
-    /// Global variables (for injecting "seed" of the LiquidVault and the FeeDistributor contracts)
-    const stakeDuration = 1
-    const donationShare = 10
-    const purchaseFee = 30
-    const liquidVaultShare = 80
-    const burnPercentage = 10
-
     function toWei(amount) {
         return web3.utils.toWei(`${ amount }`, 'ether')
     }
@@ -188,13 +181,20 @@ contract("AutonomousDegenVC", function(accounts) {
             const amountTokenMin = toWei('0')            /// [Note]: When initial addLiquidity(), this is 0
             const amountETHMin = toWei('0')              /// [Note]: When initial addLiquidity(), this is 0
             const to = deployer                          /// [Note]: Receiver address
-            const deadline = Date.now() + 3000           /// Now + 3000 seconds
-            //console.log('\n=== deadline ===', deadline)  /// e.g). 1620193601002
-
+            const deadline = Date.now() + 3000           /// Now + 3000 seconds -> e.g). 1620193601002
             const ethAmountForInitialLiquidity = toWei('10')  /// 10 ETH
 
             let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, amountTokenDesired, { from: deployer })
-            let txReceipt2 = await autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, amountTokenDesired, amountTokenMin, amountETHMin, to, deadline, { from: deployer, value: ethAmountForInitialLiquidity })  
+            let txReceipt2 = await autonomousDegenVC.createUniswapMarketForProject(PROJECT_TOKEN, 
+                                                                                   amountTokenDesired, 
+                                                                                   amountTokenMin, 
+                                                                                   amountETHMin, 
+                                                                                   to, 
+                                                                                   deadline, 
+                                                                                   { 
+                                                                                       from: deployer, 
+                                                                                       value: ethAmountForInitialLiquidity 
+                                                                                   })  
         })
 
         it("Create the LP token (ProjectToken-ETH pair) instance", async () => {
@@ -205,6 +205,10 @@ contract("AutonomousDegenVC", function(accounts) {
         })
 
         it("[Step 5]: Inject 'Seed' into a LiquidVault", async () => {
+            const stakeDuration = 7   /// 7 days (60 * 60 * 24 * 7 seconds) as the lock period
+            const donationShare = 10  /// 0~100%: LP donation  (eg. In case of this, the rate of "LP donation" is defined as "10%")
+            const purchaseFee = 20    /// 0~100%: ETH Fee      (eg. In case of this, the rate of "ETH Fee" is defined as "20%")
+
             let txReceipt = await liquidVaultFactory.injectSeedIntoLiquidVault(LIQUID_VAULT, 
                                                                                stakeDuration, 
                                                                                PROJECT_TOKEN, 
@@ -224,22 +228,24 @@ contract("AutonomousDegenVC", function(accounts) {
 
         it("[Step 6]: Inject 'Seed' into a FeeDistributor", async () => {
             const secondaryAddress = feeReceiver
-            let txReceipt = await feeDistributorFactory.injectSeedIntoFeeDistributor(FEE_DISTRIBUTOR, PROJECT_TOKEN, LIQUID_VAULT, secondaryAddress, liquidVaultShare, burnPercentage, { from: deployer })
+            const liquidVaultShare = 80
+            const burnPercentage = 10
+
+            let txReceipt = await feeDistributorFactory.injectSeedIntoFeeDistributor(FEE_DISTRIBUTOR, 
+                                                                                     PROJECT_TOKEN, 
+                                                                                     LIQUID_VAULT, 
+                                                                                     secondaryAddress, 
+                                                                                     liquidVaultShare, 
+                                                                                     burnPercentage, 
+                                                                                     { from: deployer })
 
             let event = await getEvents(feeDistributorFactory, "FeeDistributorSeeded")
             // FEE_DISTRIBUTOR = event._feeDistributor
             // console.log('\n=== FEE_DISTRIBUTOR (Seeded) ===', FEE_DISTRIBUTOR)
         })
 
-        it("[Step 7]: Set a discounted-rate (10%)", async () => {
-            const discountedRate = 10  /// 10%
-            const caller = deployer;
-
-            let txReceipt = await liquidValut.setDiscountedRate(discountedRate, caller, { from: deployer })
-        })
-
         it("[Step 8]: A Liquid Vault is capitalized with (topped up with) project tokens", async () => {
-            const capitalizedAmount = toWei('20000')  // 20,000 Project Token that is topped up into the Liquid Vault
+            const capitalizedAmount = toWei('20000')  // 20,000 ProjectTokens that will be topped up into the Liquid Vault
 
             const projectTokenBalance = await projectToken.balanceOf(deployer)
             console.log('\n=== ProjectToken balance (of deployer) ===', fromWei(String(projectTokenBalance)))
@@ -248,27 +254,19 @@ contract("AutonomousDegenVC", function(accounts) {
             let txReceipt2 = await autonomousDegenVC.capitalizeWithProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, capitalizedAmount, { from: deployer })
         })
 
-        it("[Step 9]: User1 purchase LP tokens by sending ETH fee required", async () => {
-            /// [Note]: On the assumption that the exchange rate of "ProjectToken:ETH" is "1:1"
-            /// [Note]: Based on "ethFeeRequired", a sending ETH amount will be determined.
-            const purchaseAmountOfProjectToken = 1  /// 1 ProjectToken
-            const purchaseAmountOfETH = 1           /// 1 ETH
-            const totalPurchaseAmount = toWei(`${ purchaseAmountOfProjectToken + purchaseAmountOfETH }`)
-            let ethFeeRequired = await liquidValut.getEthFeeRequired(totalPurchaseAmount)
-            console.log('\n=== ETH fee required (unit: ETH) ===', fromWei(String(ethFeeRequired)))  /// [Result]: eg). 1.8 ETH
-
-            /// [Note]: msg.sender will send "ETH fee required"
-            let txReceipt = await liquidValut.purchaseLP(totalPurchaseAmount, { from: user1, value: ethFeeRequired })
+        it("[Step 9]: User1 purchase LP tokens by sending 1 ETH", async () => {
+            const ethAmount = 1  /// 1 ETH
+            let txReceipt = await liquidValut.purchaseLP({ from: user1, value: ethAmount })
         })
 
-        it('[Step 10]: Should revert to claim LP if user1 claim within the minimum staking period (24 hours)', async () => {
+        it('[Step 10]: Should revert to claim LP if user1 claim within the lock period', async () => {
             await expectRevert(
                 liquidValut.claimLP({ from: user1 }),
-                "LiquidVault: staked-period has not passed the minimum locked-period yet"
+                "LiquidVault: LP still locked."
             )
         })
 
-        it("[Step 10]: Should be successful to claim LP if user1 claim LP after 1 weeks => As a result, user1 should receive LP tokens (50% discounted) + some rewards (project tokens)", async () => {
+        it("[Step 10]: Should be successful to claim LP if user1 claim LP after 1 weeks (the lock period). As a result, user1 should receive LP tokens and rewards (project tokens)", async () => {
             /// [Note]: "block.timestamp - batch.timestamp" must be greater than "stakeDuration"
             /// [Note]: Increase time (to 1 week ahead)
             const duration = 60 * 60 * 24 * 7  /// 1 week
