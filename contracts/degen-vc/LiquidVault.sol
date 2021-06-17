@@ -59,8 +59,8 @@ contract LiquidVault is Ownable {
         address weth;
         address payable feeReceiver;
         uint32 stakeDuration;
-        uint8 donationShare; //0-100 (%): LP donation
-        uint8 purchaseFee;   //0-100 (%): ETH Fee
+        uint8 donationShare; // 0-100 (%): The rate of "LP donation"
+        uint8 purchaseFee;   // 0-100 (%): The rate of "ETH Fee"
     }
       
     bool public forceUnlock;

@@ -279,18 +279,22 @@ contract("AutonomousDegenVC", function(accounts) {
     })
 
     describe("\n Check final result", () => {
-        it("User1 should has some amount of distributed LPs (ProjectToken-ETH pair) + Rewards (project tokens)", async () => {
+        it("User1 should has some amount of distributed-LPs (ProjectToken-ETH pair) + Rewards (project tokens)", async () => {
             let lpBalance1 = await lp.balanceOf(user1)
+            console.log('\n=== LP token (ProjectToken-ETH pair) balance of user1 ===', fromWei(String(lpBalance1)))
+
+            let projectTokenBalance1 = await projectToken.balanceOf(user1)         
+            console.log('=== Rewards (ProjectToken) balance of user1 ===', fromWei(String(projectTokenBalance1)))
+        })  
+
+        it("User2 and user3 should not has distributed-LPs (ProjectToken-ETH pair) + Rewards (project tokens)", async () => {
             let lpBalance2 = await lp.balanceOf(user2)
             let lpBalance3 = await lp.balanceOf(user3)
-            console.log('\n=== LP token (ProjectToken-ETH pair) balance of user1 ===', fromWei(String(lpBalance1)))
             console.log('=== LP token (ProjectToken-ETH pair) balance of user2 ===', fromWei(String(lpBalance2)))
             console.log('=== LP token (ProjectToken-ETH pair) balance of user3 ===', fromWei(String(lpBalance3)))
 
-            let projectTokenBalance1 = await projectToken.balanceOf(user1)
             let projectTokenBalance2 = await projectToken.balanceOf(user2)
             let projectTokenBalance3 = await projectToken.balanceOf(user3)                        
-            console.log('=== Rewards (ProjectToken) balance of user1 ===', fromWei(String(projectTokenBalance1)))
             console.log('=== Rewards (ProjectToken) balance of user2 ===', fromWei(String(projectTokenBalance2)))
             console.log('=== Rewards (ProjectToken) balance of user3 ===', fromWei(String(projectTokenBalance3)))
         })  
