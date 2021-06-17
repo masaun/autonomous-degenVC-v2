@@ -231,13 +231,6 @@ contract("AutonomousDegenVC", function(accounts) {
             // console.log('\n=== FEE_DISTRIBUTOR (Seeded) ===', FEE_DISTRIBUTOR)
         })
 
-        it("[Step 7]: Set a discounted-rate (10%)", async () => {
-            const discountedRate = 10  /// 10%
-            const caller = deployer;
-
-            let txReceipt = await liquidValut.setDiscountedRate(discountedRate, caller, { from: deployer })
-        })
-
         it("[Step 8]: A Liquid Vault is capitalized with (topped up with) project tokens", async () => {
             const capitalizedAmount = toWei('20000')  // 20,000 Project Token that is topped up into the Liquid Vault
 

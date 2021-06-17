@@ -224,7 +224,7 @@ contract LiquidVault is Ownable {
         uint stakedSeconds = block.timestamp.sub(timestamp);  // [Note]: Total staked-time (Unit is "second")
 
         // Check whether stakedPeriod of user has passed a minimum locked-period (1 day) or not
-        _checkMinimumLockedPeriod(msg.sender, stakedSeconds);
+        // [Todo]: Use stakeDuration
 
         // Distribute reward tokens into a user
         uint rewardAmount = REWARD_AMOUNT_PER_SECOND.mul(stakedSeconds);
@@ -247,12 +247,6 @@ contract LiquidVault is Ownable {
     
         // Calculate staked-time (unit is "second")
         uint stakedSeconds = block.timestamp.sub(timestamp);  // [Note]: Total staked-time (Unit is "second")
-
-        // Check whether stakedPeriod of user has passed a minimum locked-period (1 day) or not
-        _checkMinimumLockedPeriod(msg.sender, stakedSeconds);
-
-        // Get a discounted-rate
-        uint discountedRate = getDiscountedRate();
 
         uint next = queueCounter[msg.sender];
         require(
@@ -283,14 +277,6 @@ contract LiquidVault is Ownable {
     }
 
     /**
-     * @notice - Set a discounted-rate (0% ~ 100%)
-     */
-    function setDiscountedRate(uint discountedRate, address caller) public returns (bool) {
-        //require(caller == owner(), "Caller should be owner");
-        DISCOUNTED_RATE = discountedRate;
-    }
-
-    /**
      * @notice - get "ETH fee" required
      *           (On the assumption that the exchange rate of "ProjectToken : ETH" is "1 token : 1 ETH")
      *           e.g). In case of the discounted-rate is 50%, ETH fee required is 1.0 ETH
@@ -298,34 +284,12 @@ contract LiquidVault is Ownable {
      * @param purchaseAmount - Purchase amount for LPs (=purchaseAmountOfProjectToken + purchaseAmountOfETH)
      */
     function getEthFeeRequired(uint purchaseAmount) public view returns (uint _ethFeeRequired) {
-        uint discountedRate = getDiscountedRate();
+        // [Todo]: Add a calculation of the discounted-rate (50% - The rate of ETH Fee)
+        uint discountedRate;
+        //uint discountedRate = getDiscountedRate();
 
         uint ethFeeRequired = purchaseAmount.mul(ONE_HUNDRED_PERCENT.sub(discountedRate)).div(100);
         return ethFeeRequired;
-    }
-
-    /**
-     * @notice - a condition in order to adjust the `"discounted-rate" depends on `staking period` (=how many seconds a user staked)
-     */
-    function getDiscountedRate() public view returns (uint _discountedRate) {
-        return DISCOUNTED_RATE;
-    }
-
-    /**
-     * @notice - Check whether staked-period of user has passed a minimum locked-period (1 day) or not
-     * @notice - Depends on staked-period of a user, discounted-rate is differenct. (10% or 50%) 
-     */
-    function _checkMinimumLockedPeriod(address user, uint stakedSeconds) internal returns (bool) {
-        require(stakedSeconds > MINIMUM_LOCKED_PERIOD, "LiquidVault: staked-period has not passed the minimum locked-period yet");
-        require(stakedSeconds >= 1 days, "LiquidVault: staked-period must be more than 1 day (24 hours)");
-        
-        if (stakedSeconds >= 1 days) {          // More than 1 day (24 hour)
-            uint _discountedRate = 10;          // 10% is assigned as the discounted-rate
-            setDiscountedRate(_discountedRate, msg.sender);
-        } else if (stakedSeconds >= 1 weeks) {  // More than 1 week
-            uint _discountedRate = 50;          // 50% is assigned as the discounted-rate
-            setDiscountedRate(_discountedRate, msg.sender);
-        }
     }
 
     function lockedLPLength(address holder) public view returns (uint) {
