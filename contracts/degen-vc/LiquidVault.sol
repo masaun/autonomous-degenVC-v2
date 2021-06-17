@@ -199,7 +199,7 @@ contract LiquidVault is Ownable {
     /**
      * @notice - Send ETH to mint LP tokens (ProjectToken - ETH pair) in LiquidVault
      */
-    function purchaseLP(uint totalPurchaseAmount) public payable {
+    function purchaseLP() public payable {
         purchaseLPFor(msg.sender);
     }
 

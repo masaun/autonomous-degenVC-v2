@@ -249,7 +249,7 @@ contract("AutonomousDegenVC", function(accounts) {
 
         it("[Step 9]: User1 purchase LP tokens by sending 1 ETH", async () => {
             const ethAmount = 1  /// 1 ETH
-            let txReceipt = await liquidValut.purchaseLP(totalPurchaseAmount, { from: user1, value: ethAmount })
+            let txReceipt = await liquidValut.purchaseLP({ from: user1, value: ethAmount })
         })
 
         it('[Step 10]: Should revert to claim LP if user1 claim within the lock period', async () => {
@@ -259,7 +259,7 @@ contract("AutonomousDegenVC", function(accounts) {
             )
         })
 
-        it("[Step 10]: Should be successful to claim LP if user1 claim LP after 1 weeks => As a result, user1 should receive LP tokens (50% discounted) + some rewards (project tokens)", async () => {
+        it("[Step 10]: Should be successful to claim LP if user1 claim LP after 1 weeks (the lock period). As a result, user1 should receive LP tokens and rewards (project tokens)", async () => {
             /// [Note]: "block.timestamp - batch.timestamp" must be greater than "stakeDuration"
             /// [Note]: Increase time (to 1 week ahead)
             const duration = 60 * 60 * 24 * 7  /// 1 week
