@@ -256,12 +256,14 @@ contract("AutonomousDegenVC", function(accounts) {
 
         it("[Step 9]: User1 purchase LP tokens by sending 1 ETH", async () => {
             const ethAmount = 1  /// 1 ETH
-            let txReceipt = await liquidValut.purchaseLP({ from: user1, value: ethAmount })
+            let txReceipt = await autonomousDegenVC.purchaseLP(LIQUID_VAULT, { from: user1, value: ethAmount })
+            //let txReceipt = await liquidValut.purchaseLP({ from: user1, value: ethAmount })
         })
 
         it('[Step 10]: Should revert to claim LP if user1 claim within the lock period', async () => {
             await expectRevert(
-                liquidValut.claimLP({ from: user1 }),
+                autonomousDegenVC.claimLP(LIQUID_VAULT, PROJECT_TOKEN, { from: user1 }),
+                //liquidValut.claimLP({ from: user1 }),
                 "LiquidVault: LP still locked."
             )
         })
@@ -273,7 +275,8 @@ contract("AutonomousDegenVC", function(accounts) {
             await time.increase(duration)
 
             /// Claim LP
-            let txReceipt = await liquidValut.claimLP({ from: user1 })
+            let txReceipt = await autonomousDegenVC.claimLP(LIQUID_VAULT, PROJECT_TOKEN, { from: user1 })
+            //let txReceipt = await liquidValut.claimLP({ from: user1 })
         })
 
     })

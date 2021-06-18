@@ -79,7 +79,7 @@ contract AutonomousDegenVC {
     }
 
     /**
-     * @notice - ① A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
+     * @notice - ② A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
      *             (A Liquid Vault is topped up with project tokens)
      */
     function capitalizeWithProjectTokens(
@@ -92,6 +92,36 @@ contract AutonomousDegenVC {
         // @notice - Initial top up a Liquid Vault with project token
         address LIQUID_VAULT = address(liquidVault);
         projectToken.transfer(LIQUID_VAULT, capitalizedAmount);
+    }
+
+    /**
+     * @notice - ③ A user (mg.sender) send ETH into a Liquid Vault and swap ETH sent for LPs
+     *             (Then, LPs swapped will be locked in the LiquidVault)
+     */
+    function purchaseLP(LiquidVault liquidVault) payable public {
+        liquidVault.purchaseLP{ value: msg.value }();
+    } 
+
+    /**
+     * @notice - ④ A user claim LPs (ProjectToken-ETH pair)
+     *              => As a result, a user claimed receive LP tokens and rewards (ProjectTokens).
+     */
+    function claimLP(LiquidVault liquidVault, IProjectToken projectToken) public {
+        // Claim LPs
+        liquidVault.claimLP();
+
+        // Create the LP token instance
+        address PROJECT_TOKEN = address(projectToken);
+        address LP = getPair(PROJECT_TOKEN, WETH);
+        IUniswapV2Pair lp = IUniswapV2Pair(LP);
+
+        // Transfer LP tokens
+        uint lpBalance = lp.balanceOf(address(this));
+        lp.transfer(msg.sender, lpBalance);
+
+        // Transfer rewards
+        uint rewardsBalance = projectToken.balanceOf(address(this));
+        projectToken.transfer(msg.sender, rewardsBalance);
     }
 
  
@@ -114,7 +144,7 @@ contract AutonomousDegenVC {
         return (holder, amount, timestamp, claimed);
     }
 
-    // @notice - Get a LP pair address    
+    // @notice - Get a LP pair address
     function getPair(address token0, address token1) public view returns (address pair) {
         return uniswapV2Factory.getPair(token0, token1);
     }
