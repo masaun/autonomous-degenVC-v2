@@ -262,7 +262,7 @@ contract("AutonomousDegenVC", function(accounts) {
 
         it('[Step 10]: Should revert to claim LP if user1 claim within the lock period', async () => {
             await expectRevert(
-                autonomousDegenVC.claimLP({ from: user1 }),
+                autonomousDegenVC.claimLP(LIQUID_VAULT, PROJECT_TOKEN, { from: user1 }),
                 //liquidValut.claimLP({ from: user1 }),
                 "LiquidVault: LP still locked."
             )

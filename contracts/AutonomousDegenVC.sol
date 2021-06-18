@@ -79,7 +79,7 @@ contract AutonomousDegenVC {
     }
 
     /**
-     * @notice - ① A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
+     * @notice - ② A Liquid Vault is capitalized with project tokens to incentivise "early liquidity" 
      *             (A Liquid Vault is topped up with project tokens)
      */
     function capitalizeWithProjectTokens(
@@ -95,15 +95,16 @@ contract AutonomousDegenVC {
     }
 
     /**
-     * @notice - ② A user (mg.sender) send ETH into a Liquid Vault and swap ETH sent for LPs
+     * @notice - ③ A user (mg.sender) send ETH into a Liquid Vault and swap ETH sent for LPs
      *             (Then, LPs swapped will be locked in the LiquidVault)
      */
-    function cLiquidVault liquidVault) payable public {
+    function purchaseLP(LiquidVault liquidVault) payable public {
         liquidVault.purchaseLP{ value: msg.value }();
     } 
 
     /**
-     * @notice - ③ A user claim LPs (ProjectToken-ETH pair)
+     * @notice - ④ A user claim LPs (ProjectToken-ETH pair)
+     *              => As a result, a user claimed receive LP tokens and rewards (ProjectTokens).
      */
     function claimLP(LiquidVault liquidVault, IProjectToken projectToken) public {
         // Claim LPs
