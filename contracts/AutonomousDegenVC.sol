@@ -94,6 +94,35 @@ contract AutonomousDegenVC {
         projectToken.transfer(LIQUID_VAULT, capitalizedAmount);
     }
 
+    /**
+     * @notice - ② A user (mg.sender) send ETH into a Liquid Vault and swap ETH sent for LPs
+     *             (Then, LPs swapped will be locked in the LiquidVault)
+     */
+    function cLiquidVault liquidVault) payable public {
+        liquidVault.purchaseLP{ value: msg.value }();
+    } 
+
+    /**
+     * @notice - ③ A user claim LPs (ProjectToken-ETH pair)
+     */
+    function claimLP(LiquidVault liquidVault, IProjectToken projectToken) public {
+        // Claim LPs
+        liquidVault.claimLP();
+
+        // Create the LP token instance
+        address PROJECT_TOKEN = address(projectToken);
+        address LP = getPair(PROJECT_TOKEN, WETH);
+        IUniswapV2Pair lp = IUniswapV2Pair(LP);
+
+        // Transfer LP tokens
+        uint lpBalance = lp.balanceOf(address(this));
+        lp.transfer(msg.sender, lpBalance);
+
+        // Transfer rewards
+        uint rewardsBalance = projectToken.balanceOf(address(this));
+        projectToken.transfer(msg.sender, rewardsBalance);
+    }
+
  
     //----------------------------------------------
     // Inherited-methods from the LiquidVault.sol
@@ -114,7 +143,7 @@ contract AutonomousDegenVC {
         return (holder, amount, timestamp, claimed);
     }
 
-    // @notice - Get a LP pair address    
+    // @notice - Get a LP pair address
     function getPair(address token0, address token1) public view returns (address pair) {
         return uniswapV2Factory.getPair(token0, token1);
     }
