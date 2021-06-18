@@ -282,4 +282,11 @@ contract LiquidVault is Ownable {
         LPbatch memory batch = lockedLP[holder][position];
         return (batch.holder, batch.amount, batch.timestamp, batch.claimed);
     }
+
+    /**
+     * @notice - Get current reward amount per second 
+     */
+    function getRewardAmountPerSecond() public view returns (uint _currentRewardAmountPerSecond) {
+        return REWARD_AMOUNT_PER_SECOND;
+    }
 }

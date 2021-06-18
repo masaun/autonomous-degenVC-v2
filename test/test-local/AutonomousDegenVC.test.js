@@ -244,6 +244,11 @@ contract("AutonomousDegenVC", function(accounts) {
             // console.log('\n=== FEE_DISTRIBUTOR (Seeded) ===', FEE_DISTRIBUTOR)
         })
 
+        it("[Step 7]: Check current reward amount (of the LiquidVault) per second", async () => {
+            let rewardAmountPerSecond = await autonomousDegenVC.getRewardAmountPerSecond(LIQUID_VAULT)
+            console.log('\n=== Current reward amount (of the LiquidVault) per second ===', fromWei(rewardAmountPerSecond))
+        })
+
         it("[Step 8]: A Liquid Vault is capitalized with (topped up with) project tokens", async () => {
             const capitalizedAmount = toWei('20000')  // 20,000 ProjectTokens that will be topped up into the Liquid Vault
 

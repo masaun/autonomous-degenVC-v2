@@ -154,6 +154,13 @@ contract AutonomousDegenVC {
     // Getter methods
     //----------------
     /**
+     * @notice - Get current reward amount per second 
+     */
+    function getRewardAmountPerSecond(LiquidVault liquidVault) public view returns (uint _currentRewardAmountPerSecond) {
+        return liquidVault.getRewardAmountPerSecond();
+    }
+
+    /**
      * @notice - [Todo]: Identify UNI-LP token holders (= DGVC-ETH pair)
      */
     // function getLpHolders() public view returns (address[] memory _lpHolders) {
