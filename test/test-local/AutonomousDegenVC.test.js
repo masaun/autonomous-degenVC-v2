@@ -85,7 +85,17 @@ contract("AutonomousDegenVC", function(accounts) {
         return events[0].returnValues
     } 
 
-    describe("Setup smart-contracts", () => {
+    describe("\n Accounts", () => {
+        it("Show accounts (wallet addresses) list that are used for this test", async () => {
+            console.log('=== deployer ===', deployer)
+            console.log('=== user1 ===', user1)
+            console.log('=== user2 ===', user2)
+            console.log('=== user3 ===', user3)
+            console.log('=== feeReceiver ===', feeReceiver)
+        })
+    })
+
+    describe("\n Setup smart-contracts", () => {
         it("Deploy the UNI-V2 LP Token (DGVC-ETH pair) contract instance", async () => {
             lpDgvcEth = await MockLpToken.new({ from: deployer })
             LP_DGVC_ETH = lpDgvcEth.address
@@ -253,7 +263,7 @@ contract("AutonomousDegenVC", function(accounts) {
             const capitalizedAmount = toWei('20000')  // 20,000 ProjectTokens that will be topped up into the Liquid Vault
 
             const projectTokenBalance = await projectToken.balanceOf(deployer)
-            console.log('\n=== ProjectToken balance (of deployer) ===', fromWei(String(projectTokenBalance)))
+            //console.log('\n=== ProjectToken balance (of deployer) ===', fromWei(String(projectTokenBalance)))
 
             let txReceipt1 = await projectToken.approve(AUTONOMOUS_DEGEN_VC, capitalizedAmount, { from: deployer })
             let txReceipt2 = await autonomousDegenVC.capitalizeWithProjectTokens(LIQUID_VAULT, PROJECT_TOKEN, capitalizedAmount, { from: deployer })
