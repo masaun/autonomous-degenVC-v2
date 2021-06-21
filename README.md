@@ -1,6 +1,6 @@
-# Autonomous Degen.VC V2
+# Autonomous Degen.VC
 
-## 【Introduction of the Autonomous Degen.VC V2】
+## 【Introduction of the Autonomous Degen.VC】
 - This is a smart contract that enables a project to launch on Degen VC without our permission. 
   - For example, by calling a public function on a smart contract a project could allocate project tokens to a liquid vault (just an address that needs to be defined), a dev wallet (just an address that needs to be defined), and the DGVC LP.
   - When the function is called the DGVC token UNI-V2 LP will consist of a number of wallets with LP token balances. 
@@ -12,11 +12,13 @@
 
 ## 【Workflow】
 - Launch a project on Degen.VC with 5 steps:
-  - ① Create a project token
+  - ① Create a Project Token
   - ② Create a Liquid Vault
   - ③ A uniswap market is created for the new project.
-  - ④ Part of the tokens supply is Alphadropped (airdropped) to wallets that hold our $DGVC UNI-V2 LP tokens in proportion to their share of the LP.
-  - ⑤ A Liquid Vault is capitalized with project tokens to incentivise early liquidity.
+  - ④ 
+  - ⑤ A Liquid Vault is capitalized (topped up) with project tokens.
+  - ⑥ A user purchase LP tokens by sending ETH fee required.
+  - ⑦ After some period from purchased LP, a user claim LP tokens + receive some rewards (project tokens)
 
 <br>
 

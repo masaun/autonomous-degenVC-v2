@@ -2,6 +2,7 @@
 pragma solidity 0.7.4;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IUniswapV2Router02 } from "../uniswap-v2/uniswap-v2-periphery/interfaces/IUniswapV2Router02.sol";
 import { IWETH } from "../uniswap-v2/uniswap-v2-periphery/interfaces/IWETH.sol";
@@ -10,6 +11,10 @@ import { IFeeDistributor } from "./IFeeDistributor.sol";
 
 
 contract LiquidVault is Ownable {
+    using SafeMath for uint;
+
+    uint REWARD_AMOUNT_PER_SECOND = 1 * 1e15;      // [Default]: 0.001 project token is distributed per second
+
     /** Emitted when purchaseLP() is called to track ETH amounts */
     event EthTransferred(
         address from,
@@ -50,12 +55,17 @@ contract LiquidVault is Ownable {
         address weth;
         address payable feeReceiver;
         uint32 stakeDuration;
-        uint8 donationShare; //0-100
-        uint8 purchaseFee; //0-100
+        uint8 donationShare; // 0-100 (%): The rate of "LP donation"
+        uint8 purchaseFee;   // 0-100 (%): The rate of "ETH Fee"
     }
       
     bool public forceUnlock;
     bool private locked;
+
+    LiquidVaultConfig public config;
+
+    mapping(address => LPbatch[]) public lockedLP;
+    mapping(address => uint) public queueCounter;
 
     modifier lock {
         require(!locked, "LiquidVault: reentrancy violation");
@@ -63,11 +73,6 @@ contract LiquidVault is Ownable {
         _;
         locked = false;
     }
-
-    LiquidVaultConfig public config;
-
-    mapping(address => LPbatch[]) public lockedLP;
-    mapping(address => uint) public queueCounter;
 
     function seed(
         uint32 duration,
@@ -77,7 +82,7 @@ contract LiquidVault is Ownable {
         address feeDistributor,
         address payable feeReceiver,
         uint8 donationShare, // LP Token
-        uint8 purchaseFee // ETH
+        uint8 purchaseFee    // ETH
     ) public onlyOwner {
         config.projectToken = projectToken;
         config.uniswapRouter = IUniswapV2Router02(uniswapRouter);
@@ -126,23 +131,23 @@ contract LiquidVault is Ownable {
 
     function purchaseLPFor(address beneficiary) public payable lock {
         config.feeDistributor.distributeFees();
-        require(msg.value > 0, "LiquidVault: ETH required to mint INFINITY LP");
+        require(msg.value > 0, "LiquidVault: ETH required to mint LP tokens (which is a ProjectToken-ETH pair)");
 
         uint feeValue = (config.purchaseFee * msg.value) / 100;
         uint exchangeValue = msg.value - feeValue;
 
         (uint reserve1, uint reserve2, ) = config.tokenPair.getReserves();
 
-        uint infinityRequired;
+        uint projectTokenRequired;
 
         if (address(config.projectToken) < address(config.weth)) {
-              infinityRequired = config.uniswapRouter.quote(
+              projectTokenRequired = config.uniswapRouter.quote(
                   exchangeValue,
                   reserve2,
                   reserve1
               );
         } else {
-              infinityRequired = config.uniswapRouter.quote(
+              projectTokenRequired = config.uniswapRouter.quote(
                   exchangeValue,
                   reserve1,
                   reserve2
@@ -151,18 +156,19 @@ contract LiquidVault is Ownable {
 
         uint balance = IERC20(config.projectToken).balanceOf(address(this));
         require(
-              balance >= infinityRequired,
-              "LiquidVault: insufficient INFINITY tokens in LiquidVault"
+              balance >= projectTokenRequired,
+              "LiquidVault: insufficient ProjectTokens in LiquidVault"
         );
 
-        IWETH(config.weth).deposit{ value: exchangeValue }();
+        IWETH(config.weth).deposit{ value: exchangeValue }();  // Convert ETH to WETH
         address tokenPairAddress = address(config.tokenPair);
         IWETH(config.weth).transfer(tokenPairAddress, exchangeValue);
         IERC20(config.projectToken).transfer(
             tokenPairAddress,
-            infinityRequired
+            projectTokenRequired
         );
 
+        //@notice - LP tokens (ProjectToken - ETH pair) are minted
         uint liquidityCreated = config.tokenPair.mint(address(this));
         config.feeReceiver.transfer(feeValue);
 
@@ -179,19 +185,58 @@ contract LiquidVault is Ownable {
             beneficiary,
             liquidityCreated,
             exchangeValue,
-            infinityRequired,
+            projectTokenRequired,
             block.timestamp
         );
 
          emit EthTransferred(msg.sender, exchangeValue, feeValue);
     }
 
-    //send ETH to match with the ProjectTokens in LiquidVault
+    /**
+     * @notice - Send ETH to mint LP tokens (ProjectToken - ETH pair) in LiquidVault
+     */
     function purchaseLP() public payable {
         purchaseLPFor(msg.sender);
     }
 
+    /**
+     * @notice - Claim project tokens (per second) as staking reward 
+     */
+    function claimRewards() public {        
+        // Identify a LPbatch (Locked-LP)
+        address holder;
+        uint amount;
+        uint timestamp;  // [Note]: Starting timestamp to be locked
+        bool claimed;
+        (holder, amount, timestamp, claimed) = getLockedLP(msg.sender, 0);
+
+        require(holder == msg.sender, "Holder must be msg.sender");
+    
+        // Calculate staked-time (unit is "second")
+        uint stakedSeconds = block.timestamp.sub(timestamp);  // [Note]: Total staked-time (Unit is "second")
+
+        // Distribute reward tokens into a user
+        uint rewardAmount = REWARD_AMOUNT_PER_SECOND.mul(stakedSeconds);
+        IERC20(config.projectToken).transfer(holder, rewardAmount);
+    }
+
+    /**
+     * @notice - Claim LP tokens (ProjectToken - ETH pair)
+     */
     function claimLP() public {
+        // Identify a LPbatch (Locked-LP)
+        address holder;
+        uint amount;
+        uint timestamp;  // [Note]: Starting timestamp to be locked
+        bool claimed;
+        (holder, amount, timestamp, claimed) = getLockedLP(msg.sender, 0);
+
+        // Check whether msg.sender is holder or not
+        require(holder == msg.sender, "Holder must be msg.sender");
+    
+        // Calculate staked-time (unit is "second")
+        uint stakedSeconds = block.timestamp.sub(timestamp);  // [Note]: Total staked-time (Unit is "second")
+
         uint next = queueCounter[msg.sender];
         require(
             next < lockedLP[msg.sender].length,
@@ -215,6 +260,9 @@ contract LiquidVault is Ownable {
             config.tokenPair.transfer(batch.holder, batch.amount - donation),
             "LiquidVault: transfer failed in LP claim."
         );
+
+        // Claim project tokens as staking reward
+        claimRewards();
     }
 
     function lockedLPLength(address holder) public view returns (uint) {
@@ -233,5 +281,12 @@ contract LiquidVault is Ownable {
     {
         LPbatch memory batch = lockedLP[holder][position];
         return (batch.holder, batch.amount, batch.timestamp, batch.claimed);
+    }
+
+    /**
+     * @notice - Get current reward amount per second 
+     */
+    function getRewardAmountPerSecond() public view returns (uint _currentRewardAmountPerSecond) {
+        return REWARD_AMOUNT_PER_SECOND;
     }
 }
